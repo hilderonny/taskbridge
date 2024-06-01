@@ -28,7 +28,9 @@ apiRouter.get("/", function(_, res) {
         return {
             id: task.id,
             type: task.type,
-            inprogress: task.inprogress
+            status: task.status,
+            createdat: task.createdat,
+            startedat: task.startedat
         }
     })
     res.send(filteredtasks)
