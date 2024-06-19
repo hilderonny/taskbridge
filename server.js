@@ -18,7 +18,7 @@ app.use(express.json({ limit: "50mb"}))
 var cors = require("cors")
 app.use(cors())
 
-app.use('/api/tasks', require('./api/tasks'))
+app.use("/api/tasks", require("./api/tasks.js"))
 
 app.listen(PORT, () => {
     console.log(`Task bridge listening on port ${PORT}`)

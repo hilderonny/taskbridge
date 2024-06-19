@@ -86,3 +86,39 @@ results.
 |--|--|
 | URL | `POST /api/tasks/finish/:taskid` |
 | BODY | Result of the processing |
+
+## Docker
+
+See [How to Build and Run a NodeJS app with Docker & GitHub Actions](https://blog.devgenius.io/how-to-build-and-run-a-nodejs-app-with-docker-github-actions-59eb264dfef5)
+
+### Create a docker image
+
+```
+docker build -t hilderonny2024/taskbridge . 
+```
+
+### Running the docker image
+
+When running the image into a container, map the port 8080 of the container to a port where the
+outer world has access to (e.g. 80).
+
+```
+docker run -p 80:8080 hilderonny2024/taskbridge
+```
+
+Ckeck whether the container runs correctly by opening `http://localhost:80/api/tasks`. You should get `[]` back.
+
+## Publishing the docker image to Docker Hub
+
+```
+docker login
+docker push hilderonny2024/taskbridge
+```
+
+Have a look at https://hub.docker.com/repository/docker/hilderonny2024/taskbridge/ whether the publishing succeeded.
+
+It can now be received with
+
+```
+
+```

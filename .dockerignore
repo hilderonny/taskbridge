@@ -1,0 +1,7 @@
+node_modules
+tasks.json
+.git
+.cache
+.gitignore
+.github
+.vscode
