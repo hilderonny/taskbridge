@@ -224,4 +224,4 @@ Response
 
 ## Known workers
 
-Currently none.
+1. [Text translation](https://github.com/hilderonny/taskworker-translate)
