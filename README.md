@@ -1,15 +1,35 @@
 # taskbridge
-Server for distributing tasks to workers
+Server for distributing tasks to workers.
+The worker implementations define what kind of tasks they can process.
+
+1. [Installation](#installation)
+1. [Running](#Running)
+1. [General task format](#general-task-format)
+    1. [Add a task](#add-a-task)
+    1. [Take a task for processing](#take-a-task-for-processing)
+    1. [Report task completion](#report-task-completion)
+    1. [Remove a task](#remove-a-task)
+    1. [Restart a task](#restart-a-task)
+    1. [Get status information about a task](#get-status-information-about-a-task)
+    1. [Get the results of a completed task](#get-the-results-of-a-completed-task)
+    1. [Get all details of a task](#get-all-details-of-a-task)
+    1. [List all tasks](#list-all-tasks)
+1. [Known workers](#known-workers)
+
+## Installation
+
+1. Download and install NodeJS.
+2. Run `npm ci` in this folder.
 
 ## Running
 
 On Windows via command line
 
 ```cmd
-set PORT=8080 && set TASKFILE=.\tasks.json && node server.js
+set PORT=8080 && set TASKFILE=.\tasks.json && set SAVEINTERVAL=60000 && node server.js
 ```
 
-## Task format
+## General task format
 
 ```js
 task = {
@@ -19,6 +39,10 @@ task = {
     createdat: 1717394497292,
     startedat: 1717395321826,
     completedat: 1717395345196,
+    requirements: {
+        sourcelanguage: "en",
+        targetlanguage: "de"
+    },
     data: { ... },
     result: { ... }
 }
@@ -27,62 +51,177 @@ task = {
 |Property|Description|
 |---|---|
 |`id`|Unique identifier (UUID) of the task|
-|`type`|Type defining the possible workers which can handle the task. For example `translate`, `transcribe`, `clasifyimage`, `describeimage` or `speak`|
-|`createdat`|Timestamp in milliseconds when the task was created|
-|`startedat`|Timmestamp when a worker took a task and started working on it. At this time the status switched to `inprogress`|
-|`completedat`|Timestamp when a worker reported a result for the task. At this time the status switched to `done`|
-|`data`|Data to be processed by the worker. Depends on the task type and on the requirements of the specific worker.|
-|`result`|Result the worker reported after completing the task. Also depends on the task ype and the worker.|
+|`type`|Type of the task. For example `translate`, `transcribe`, `classifyimage`, `describeimage` or something else.|
+|`status`|One of `open`, `inprogress`, `completed`.|
+|`createdat`|Timestamp in milliseconds when the task was created.|
+|`startedat`|Timmestamp when a worker took a task and started working on it. At this time the status switched to `inprogress`.|
+|`completedat`|Timestamp when a worker reported a result for the task. At this time the status switched to `done`.|
+|`requirements`|Requirements a worker must meet in its `abilities`. Each requirement must match exactly to the worker ability.|
+|`data`|Data to be processed by the worker. Depends on the task type and on the requirements of the specific task.|
+|`result`|Result the worker reported after completing the task. Also depends on the task type.|
 
-## Worker types
+## Add a task
 
-|Task type|Description|Worker|
-|---|---|---|
-|`translate`|Translate texts between different languages|[taskworker-translate](https://github.com/hilderonny/taskworker-translate)|
+```
+POST /api/tasks/add/
+```
 
-## Client
+Request body
 
-Clients add tasks to the queue, poll their status and fetch the results.
+```json
+{
+    "type": "translate",
+    "requirements": {
+        "sourcelanguage": "en",
+        "targetlanguage": "de"
+    },
+    "data": "Hello World"
+}
+```
 
-### Add a task
+Response
 
-|||
-|--|--|
-| URL | `POST /api/tasks/add/:type` |
-| BODY | Data to process |
-| RESPONSE | id |
+```json
+{
+    "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f"
+}
+```
 
-### Poll status
+## Take a task for processing
 
-|||
-|--|--|
-| URL | `POST /api/tasks/status/:taskid` |
-| RESPONSE | status: `open`, `inprogress` or `done` |
+```
+POST /api/tasks/take/
+```
 
-### Fetch result and delete from queue
+Request body
 
-|||
-|--|--|
-| URL | POST `/api/tasks/result/:taskid` |
-| RESPONSE | Full task information with data and result |
+```json
+{
+    "type": "translate",
+    "abilities": {
+        "sourcelanguage": "en",
+        "targetlanguage": "de"
+    }
+}
+```
 
+Response on matching task
 
-## Worker
+```json
+{
+    "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
+    "data": "Hello World"
+}
+```
 
-Workers ask for open tasks of specific type, take them from the queue and report
-results.
+If no matching task is available, status `404` is returned.
 
-### Ask for task of type an take it
+## Report task completion
 
-|||
-|--|--|
-| URL | `POST /api/tasks/task/:type` |
-| RESPONSE | Full task information with data |
-| ERROR | When no task for type was found |
+```
+POST /api/tasks/complete/:id
+```
 
-### Report task result
+Request body
 
-|||
-|--|--|
-| URL | `POST /api/tasks/finish/:taskid` |
-| BODY | Result of the processing |
+```json
+{
+    "result": "Hallo Welt"
+}
+```
+
+Response is status `200`.
+
+## Remove a task
+
+```
+DELETE /api/tasks/remove/:id
+```
+
+Response is status `200`.
+
+## Restart a task
+
+```
+GET /api/tasks/restart/:id
+```
+
+Response is status `200`.
+
+## Get status information about a task
+
+```
+GET /api/tasks/status/:id
+```
+
+Response
+
+```json
+{
+    "status": "inprogress"
+}
+```
+
+## Get the results of a completed task
+
+```
+GET /api/tasks/result/:id
+```
+
+Response
+
+```json
+{
+    "result": "Hallo Welt"
+}
+```
+
+## Get all details of a task
+
+```
+GET /api/tasks/details/:id
+```
+
+Response
+
+```json
+{
+    "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
+    "type": "translate",
+    "status": "open",
+    "createdat": 1717394497292,
+    "startedat": 1717395321826,
+    "completedat": 1717395345196,
+    "requirements": {
+        "sourcelanguage": "en",
+        "targetlanguage": "de"
+    },
+    "data": { ... },
+    "result": { ... }
+}
+```
+
+## List all tasks
+
+```
+GET /api/tasks/list/
+```
+
+Response
+
+```json
+[
+    {
+        "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
+        "type": "translate",
+        "status": "open",
+        "createdat": 1717394497292,
+        "startedat": 1717395321826,
+        "completedat": 1717395345196
+    }
+]
+```
+
+## Known workers
+
+Currently none.
