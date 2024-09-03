@@ -17,14 +17,7 @@ if (!SAVEINTERVAL) {
     process.exit(4)
 }
 
-var express = require("express")
-var app = express()
-app.use(express.json({ limit: "50mb"}))
-
-var cors = require("cors")
-app.use(cors())
-
-app.use('/api/tasks', require('./api/tasks'))
+var app = require("./app")
 
 app.listen(PORT, () => {
     console.log(`Task bridge listening on port ${PORT}`)

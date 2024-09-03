@@ -12,7 +12,6 @@ const apiRouter = express.Router()
 // Load tasks file or create a new one
 fs.readFile(TASKFILE, "utf8", (error, data) => {
     if (error) {
-        console.error(`Task file "${TASKFILE}" could not be opened for reading. Creating a new one...`)
         saveTasks()
     } else {
         tasks = JSON.parse(data)
