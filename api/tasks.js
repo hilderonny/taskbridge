@@ -66,7 +66,7 @@ apiRouter.post('/take/', function(req, res) {
         if (task.status !== "open") return false
         if (task.type !== type) return false
         if (task.requirements) {
-            for (var [key, value] of Object.entities(task.requirements)) {
+            for (var [key, value] of Object.entries(task.requirements)) {
                 var ability = abilities[key]
                 if (!ability) return false
                 if (ability !== value) return false
