@@ -16,8 +16,8 @@
                     var resultresponse = await fetch("/api/tasks/result/" + taskidtowaitfor)
                     var json = await resultresponse.json()
                     var translatedtexts = json.result.texts
-                    targetdiv.innerHTML = translatedtexts.join("<br/>")
-                    console.log(result)
+                    targetdiv.innerHTML = translatedtexts.map(el => `<span title="${el.language || ""}">${el.text}</span>`).join("<br/>")
+                    await fetch("/api/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
                     clearInterval(intervalid)
                     intervalid = undefined
                 } else {
@@ -37,11 +37,8 @@
                     },
                     body: JSON.stringify({
                         type: "translate",
-                        requirements: {
-                            sourcelanguage: "en",
-                            targetlanguage: "de"
-                        },
                         data: {
+                            targetlanguage: "de",
                             texts: sourcetexts
                         }
                     })
@@ -61,7 +58,7 @@
         </script>
     </head>
     <body style="display:flex;flex-direction:column;">
-        <textarea id="inputtext" style="display:block;">It was not me!</textarea>
+        <textarea id="inputtext" style="display:block;" rows="10">It was not me!</textarea>
         <button id="start">Translate</button>
         <div id="result"></div>
     </body>
