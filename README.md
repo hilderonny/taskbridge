@@ -72,6 +72,7 @@ sudo systemctl start taskbridge
 task = {
     id: "36b8f84d-df4e-4d49-b662-bcde71a8764f",
     type: "translate",
+    worker: "ROG",
     status: "open",
     createdat: 1717394497292,
     startedat: 1717395321826,
@@ -89,6 +90,7 @@ task = {
 |---|---|
 |`id`|Unique identifier (UUID) of the task|
 |`type`|Type of the task. For example `translate`, `transcribe`, `classifyimage`, `describeimage` or something else.|
+|`worker`|Name of the worker which is processing the task|
 |`status`|One of `open`, `inprogress`, `completed`.|
 |`createdat`|Timestamp in milliseconds when the task was created.|
 |`startedat`|Timmestamp when a worker took a task and started working on it. At this time the status switched to `inprogress`.|
