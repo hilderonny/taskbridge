@@ -2,17 +2,17 @@
 var tasktablebody = document.getElementById("tasks")
 
 async function deletetask(taskid) {
-    await fetch("/api/tasks/result/" + taskid)
+    await fetch("/api/tasks/remove/" + taskid, { method: 'DELETE' })
     loadTasks()
 }
 
 async function loadTasks() {
     const result = await fetch("/api/tasks/list/")
     const tasks = await result.json()
-    console.log(tasks)
+    //console.log(tasks)
     tasktablebody.innerText = ""
     var now = Date.now()
-    for (var task of tasks) {
+    for (const task of tasks) {
         var diffsecs = Math.round((now - task.createdat) / 1000)
         var minutes = Math.floor(diffsecs / 60)
         var seconds = diffsecs - (minutes * 60)
@@ -24,7 +24,11 @@ async function loadTasks() {
         tr.appendChild(actiontd)
         var deletebutton = document.createElement("button")
         deletebutton.innerText = "Delete"
-        deletebutton.addEventListener("click", function() { deletetask(task.id)})
+        deletebutton.addEventListener("click", async () => { 
+            //if (window.confirm(`Really delete task ${task.id}?`)) {
+                await deletetask(task.id)
+            //}
+        })
         actiontd.appendChild(deletebutton)
     }
 }

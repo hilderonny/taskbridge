@@ -16,9 +16,10 @@
                     var resultresponse = await fetch("/api/tasks/result/" + taskidtowaitfor)
                     var json = await resultresponse.json()
                     var translatedtexts = json.result.texts
-                    targetdiv.innerText = translatedtexts.join("<br/>")
+                    targetdiv.innerHTML = translatedtexts.join("<br/>")
                     console.log(result)
                     clearInterval(intervalid)
+                    intervalid = undefined
                 } else {
                     targetdiv.innerText = `Waiting for result of task ${taskidtowaitfor} (${statusresult.status})`
                     console.log(statusresult)
@@ -26,7 +27,7 @@
             }
 
             async function translate() {
-                var sourcetext = inputfield.value
+                var sourcetexts = inputfield.value.split("\n")
 
                 var addresponse = await fetch("/api/tasks/add/", {
                     method: "POST",
@@ -41,14 +42,16 @@
                             targetlanguage: "de"
                         },
                         data: {
-                            texts: [ sourcetext ]
+                            texts: sourcetexts
                         }
                     })
                 })
                 var addresult = await addresponse.json()
                 taskidtowaitfor = addresult.id
 
-                intervalid = setInterval(waiter, 1000)
+                if (!intervalid) {
+                    intervalid = setInterval(waiter, 1000)
+                }
                 waiter()
 
             }
@@ -58,9 +61,7 @@
         </script>
     </head>
     <body style="display:flex;flex-direction:column;">
-        <textarea id="inputtext" style="display:block;">
-It was not me!
-        </textarea>
+        <textarea id="inputtext" style="display:block;">It was not me!</textarea>
         <button id="start">Translate</button>
         <div id="result"></div>
     </body>
