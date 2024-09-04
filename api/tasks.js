@@ -61,6 +61,7 @@ apiRouter.post("/add/", function(req, res) {
 // Take a task for processing
 apiRouter.post('/take/', function(req, res) {
     var type = req.body.type
+    var worker = req.body.worker
     var abilities = req.body.abilities || {}
     var firstMatchingTask = tasks.find(function(task) {
         if (task.status !== "open") return false
@@ -78,6 +79,7 @@ apiRouter.post('/take/', function(req, res) {
         res.status(404).send()
     } else {
         firstMatchingTask.status = "inprogress"
+        firstMatchingTask.worker = worker
         firstMatchingTask.startedat = Date.now()
         isDirty = true
         res.status(200).send({
@@ -158,7 +160,8 @@ apiRouter.get("/list/", function(_, res) {
             status: task.status,
             createdat: task.createdat,
             startedat: task.startedat,
-            completedat: task.completedat
+            completedat: task.completedat,
+            worker: task.worker
         }
     })
     res.status(200).send(filteredtasks)

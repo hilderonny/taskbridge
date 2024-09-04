@@ -19,7 +19,7 @@ async function loadTasks() {
         var duration = `${("" + minutes).padStart(2, "0")}:${("" + seconds).padStart(2, "0")}`
         var tr = document.createElement("tr")
         tasktablebody.appendChild(tr)
-        tr.innerHTML += `<tr><td>${task.id}</td><td>${task.type}</td><td>${task.status}</td><td>${duration}</td><td></td>`
+        tr.innerHTML += `<tr><td>${task.id}</td><td>${task.type}</td><td>${task.status}</td><td>${duration}</td><td>${task.worker || ""}</td>`
         var actiontd = document.createElement("td")
         tr.appendChild(actiontd)
         var deletebutton = document.createElement("button")
