@@ -21,12 +21,49 @@ The worker implementations define what kind of tasks they can process.
 1. Download and install NodeJS.
 2. Run `npm ci` in this folder.
 
-## Running
+## Running manually
 
 On Windows via command line
 
 ```cmd
-set PORT=8080 && set TASKFILE=.\tasks.json && set SAVEINTERVAL=60000 && node server.js
+set PORT=42000 && set TASKFILE=.\tasks.json && set SAVEINTERVAL=60000 && node server.js
+```
+
+On Linux via command line
+
+```cmd
+env PORT=42000 TASKFILE=.\tasks.json SAVEINTERVAL=60000 /usr/bin/node server.js
+```
+
+## Installing as service on Linux
+
+Create a file `/etc/systemd/system/taskbridge.service` with the following content.
+
+```
+[Unit]
+Description=taskbridge
+
+[Service]
+ExecStart=/usr/bin/node /github/hilderonny/taskbridge/index.js
+WorkingDirectory=/github/hilderonny/taskbridge
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=taskbridge
+Environment="PORT=42000"
+Environment="TASKFILE=/github/hilderonny/taskbridge/tasks.json"
+Environment="SAVEINTERVAL=60000"
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Now run those cammands to enable and start the service.
+
+```sh
+sudo systemctl enable taskbridge
+sudo systemctl start taskbridge
 ```
 
 ## General task format

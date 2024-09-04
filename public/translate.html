@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module">
+
+            var inputfield = document.getElementById("inputtext")
+            var targetdiv = document.getElementById("result")
+
+            var taskidtowaitfor
+            var intervalid
+
+            async function waiter() {
+                var statusresponse = await fetch("/api/tasks/status/" + taskidtowaitfor)
+                var statusresult = await statusresponse.json()
+                if (statusresult.status === "completed") {
+                    var resultresponse = await fetch("/api/tasks/result/" + taskidtowaitfor)
+                    var json = await resultresponse.json()
+                    var translatedtexts = json.result.texts
+                    targetdiv.innerText = translatedtexts.join("<br/>")
+                    console.log(result)
+                    clearInterval(intervalid)
+                } else {
+                    targetdiv.innerText = `Waiting for result of task ${taskidtowaitfor} (${statusresult.status})`
+                    console.log(statusresult)
+                }
+            }
+
+            async function translate() {
+                var sourcetext = inputfield.value
+
+                var addresponse = await fetch("/api/tasks/add/", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        type: "translate",
+                        requirements: {
+                            sourcelanguage: "en",
+                            targetlanguage: "de"
+                        },
+                        data: {
+                            texts: [ sourcetext ]
+                        }
+                    })
+                })
+                var addresult = await addresponse.json()
+                taskidtowaitfor = addresult.id
+
+                intervalid = setInterval(waiter, 1000)
+                waiter()
+
+            }
+
+            document.getElementById("start").addEventListener("click", translate)
+
+        </script>
+    </head>
+    <body style="display:flex;flex-direction:column;">
+        <textarea id="inputtext" style="display:block;">
+It was not me!
+        </textarea>
+        <button id="start">Translate</button>
+        <div id="result"></div>
+    </body>
+</html>
