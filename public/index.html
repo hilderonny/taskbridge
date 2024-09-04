@@ -2,33 +2,25 @@
 <html>
     <head>
         <title>Task Bridge</title>
-        <script type="module" src="scripts/main.js"></script>
+        <link rel="stylesheet" href="styles/root.css">
     </head>
     <body>
 
-        <h1>Task Bridge</h1>
+        <div class="navigation">
 
-        <p id="time"></p>
+            <div class="header">
+                <div class="title">Task Bridge</div>
+                <div class="subtitle">&copy; 2024 Ronny Hildebrandt</div>
+            </div>
 
-        <p>
-            <a href="translate.html">Translate</a>
-        </p>
+            <div class="links">
+                <input type="radio" id="link-workers" name="link" onclick="self.frames['content'].location.href='workers.html'"><label for="link-workers">Workers</label>
+                <input type="radio" id="link-tasks" name="link" checked onclick="self.frames['content'].location.href='tasks.html'"><label for="link-tasks">Tasks</label>
+            </div>
 
-        <h2>Tasks</h2>
+        </div>
 
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Duration</th>
-                    <th>Worker</th>
-                    <th colspan="4">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="tasks"></tbody>
-        </table>
+        <iframe name="content" src="tasks.html"></iframe>
             
     </body>
 </html>
