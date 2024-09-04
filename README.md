@@ -32,7 +32,7 @@ set PORT=42000 && set TASKFILE=.\tasks.json && set SAVEINTERVAL=60000 && node se
 On Linux via command line
 
 ```cmd
-env PORT=42000 TASKFILE=.\tasks.json SAVEINTERVAL=60000 /usr/bin/node server.js
+env PORT=42000 TASKFILE=./tasks.json SAVEINTERVAL=60000 /usr/bin/node server.js
 ```
 
 ## Installing as service on Linux
@@ -44,7 +44,7 @@ Create a file `/etc/systemd/system/taskbridge.service` with the following conten
 Description=taskbridge
 
 [Service]
-ExecStart=/usr/bin/node /github/hilderonny/taskbridge/index.js
+ExecStart=/usr/bin/node /github/hilderonny/taskbridge/server.js
 WorkingDirectory=/github/hilderonny/taskbridge
 Restart=always
 RestartSec=10
