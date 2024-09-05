@@ -84,7 +84,7 @@
                 document.querySelector(".detailsoverlay .rightcolumn .createdat").innerText = formatTimestamp(task.createdat)
                 document.querySelector(".detailsoverlay .rightcolumn .startedat").innerText = task.startedat ? formatTimestamp(task.startedat) : ""
                 document.querySelector(".detailsoverlay .rightcolumn .completedat").innerText = task.completedat ? formatTimestamp(task.completedat) : ""
-                var duration = task.completedat ? Math.round((task.completedat - task.createdat) / 1000) : undefined
+                var duration = task.completedat ? Math.round((task.completedat - task.startedat) / 1000) : undefined
                 document.querySelector(".detailsoverlay .rightcolumn .duration div").innerText = duration ? formatDuration(duration) : "-"
                 document.querySelector(".detailsoverlay button.restart").onclick = async () => {
                     await fetch(`${apiroot}/restart/${taskid}`)
