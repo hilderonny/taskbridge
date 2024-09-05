@@ -264,3 +264,7 @@ Response
 ## Known workers
 
 1. [Text translation](https://github.com/hilderonny/taskworker-translate)
+
+## References
+
+1. [Nodes icons created by Kalashnyk - Flaticon](https://www.flaticon.com/free-icons/nodes)
