@@ -10,14 +10,14 @@
             var intervalid
 
             async function waiter() {
-                var statusresponse = await fetch("/api/tasks/status/" + taskidtowaitfor)
+                var statusresponse = await fetch("/api/v1/tasks/status/" + taskidtowaitfor)
                 var statusresult = await statusresponse.json()
                 if (statusresult.status === "completed") {
-                    var resultresponse = await fetch("/api/tasks/result/" + taskidtowaitfor)
+                    var resultresponse = await fetch("/api/v1/tasks/result/" + taskidtowaitfor)
                     var json = await resultresponse.json()
                     var translatedtexts = json.result.texts
                     targetdiv.innerHTML = translatedtexts.map(el => `<span title="${el.language || ""}">${el.text}</span>`).join("<br/>")
-                    await fetch("/api/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
+                    await fetch("/api/v1/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
                     clearInterval(intervalid)
                     intervalid = undefined
                 } else {
@@ -29,7 +29,7 @@
             async function translate() {
                 var sourcetexts = inputfield.value.split("\n")
 
-                var addresponse = await fetch("/api/tasks/add/", {
+                var addresponse = await fetch("/api/v1/tasks/add/", {
                     method: "POST",
                     headers: {
                         "Accept": "application/json",

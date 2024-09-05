@@ -122,6 +122,10 @@ apiRouter.get('/restart/:id', function(req, res) {
         res.status(404).send()
     } else {
         matchingTask.status = "open"
+        delete matchingTask.result
+        delete matchingTask.worker
+        delete matchingTask.startedat
+        delete matchingTask.completedat
         isDirty = true
         res.status(200).send()
     }

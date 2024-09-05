@@ -23,11 +23,7 @@
 
             .board .lane .tasks .task .tasktitle { grid-area: title; padding-bottom: 16px; }
             .board .lane .tasks .task .tasktype { grid-area: type; }
-            .tasktype div { display: inline-block; font-weight: bold; border-radius: 3px; padding: 2px 4px; text-transform: uppercase; font-size: 9pt; }
-            .tasktype.classifyimage div { color: #12284d; background-color: #ffc300; }
-            .tasktype.scanforvirus div { color: #ffffff; background-color: #f08000; }
-            .tasktype.translate div { color: #ffffff; background-color: #4fcbdf; }
-            .tasktype.transcribe div { color: #ffffff; background-color: #6554c0; }
+            .tasktype div { display: inline-block; color: #ffffff; font-weight: bold; border-radius: 3px; padding: 2px 4px; text-transform: uppercase; font-size: 9pt; }
             .board .lane .tasks .task .taskduration { grid-area: duration; text-align: center; }
             .board .lane .tasks .task .taskduration div { display: inline-block; font-weight: bold; color: #112246; background-color: #eceef1; border: 1px solid; border-radius: 8px; padding: 2px 6px; font-size: 9pt; }
             .board .lane .tasks .task .taskworker { grid-area: worker; text-align: right; }
@@ -42,7 +38,7 @@
             .detailsoverlay .dialog .header .close { width: 45px; font-size: 24pt; background: none; border: none; cursor: pointer; border-radius: 2px; }
             .detailsoverlay .dialog .header .close:hover { background-color: #d5d6d8; }
 
-            .detailsoverlay .dialog .content { flex: 1; display: flex; flex-direction: row; }
+            .detailsoverlay .dialog .content { flex: 1; display: flex; flex-direction: row; overflow: auto; }
             .detailsoverlay .dialog .content .leftcolumn { flex: 1; display: flex; flex-direction: column; }
             .detailsoverlay .dialog .content .leftcolumn .buttonrow { margin: 16px 0; }
             .detailsoverlay .dialog .content .leftcolumn .buttonrow button { background: #f1f2f4 no-repeat 6px center; background-size: 20px; border: none; border-radius: 3px; padding: 8px 8px 8px 32px; cursor: pointer; }
@@ -53,7 +49,7 @@
             .detailsoverlay .dialog .content .leftcolumn .buttonrow button.delete:hover { background-color: #ebc0bd; }
 
             .detailsoverlay .dialog .content .leftcolumn h1 { font-size: 18pt; font-weight: normal; margin-top: 20px; margin-bottom: 12px; }
-            .detailsoverlay .dialog .content .leftcolumn .rawdata { flex: 1; padding: 8px; border: 1px solid #eeeeee; overflow: auto; font-family: monospace; white-space: pre-wrap; }
+            .detailsoverlay .dialog .content .leftcolumn .rawdata { padding: 8px; border: 1px solid #eeeeee; overflow: auto; font-family: monospace; white-space: pre-wrap; }
 
             .detailsoverlay .dialog .content .rightcolumn { margin-top: 8px; margin-left: 40px; color: #4e5d76; }
             .detailsoverlay .dialog .content .rightcolumn h1 { font-size: 12pt; font-weight: normal; display: block; padding: 16px; border: 1px solid #eeeeee; border-radius: 3px 3px 0 0; margin: 0;  }
@@ -62,7 +58,8 @@
             .detailsoverlay .dialog .content .rightcolumn td { text-align: left; padding: 12px; color: #647492; }
             .detailsoverlay .dialog .content .rightcolumn .status div { display: inline-block; font-weight: bold; color: #112246; background-color: #eceef1; border-radius: 3px; padding: 2px 6px; font-size: 9pt; text-transform: uppercase; }
             .detailsoverlay .dialog .content .rightcolumn .status.inprogress div { background-color: #ffc400; }
-            .detailsoverlay .dialog .content .rightcolumn .status.completed div { background-color: #63ba3c; }
+            .detailsoverlay .dialog .content .rightcolumn .status.completed div { background-color: #63ba3c; color: #ffffff; }
+            .detailsoverlay .dialog .content .rightcolumn .duration div { display: inline-block; font-weight: bold; color: #112246; background-color: #eceef1; border-radius: 8px; padding: 2px 6px; font-size: 9pt; }
 
         </style>
         <script type="module">
@@ -70,16 +67,50 @@
             var tasktablebody = document.getElementById("tasks")
             var apiroot = "/api/v1/tasks"
 
-            async function deleteTask(taskid) {
-                await fetch(`${apiroot}/remove/${taskid}`, { method: 'DELETE' })
-                loadTasks()
-            }
-
             async function showTaskDetails(taskid) {
                 var response = await fetch(`${apiroot}/details/${taskid}`)
-                var taskdetails = await response.json()
-                console.log(taskdetails)
+                var task = await response.json()
+                console.log(task)
+                document.querySelector(".detailsoverlay .header .title").innerText = task.id
+                document.querySelector(".detailsoverlay .rawdata.data").innerText = task.data ? JSON.stringify(task.data, null, 2) : ""
+                document.querySelector(".detailsoverlay .rawdata.result").innerText = task.result ? JSON.stringify(task.result, null, 2) : ""
+                var taskTypeDiv = document.querySelector(".detailsoverlay .rightcolumn .tasktype div")
+                taskTypeDiv.innerText = task.type
+                var typeColor = `hsl(${calculateHue(task.type)}deg 50% 50%)`
+                taskTypeDiv.style.backgroundColor = typeColor
+                document.querySelector(".detailsoverlay .rightcolumn .worker").innerText = task.worker || ""
+                document.querySelector(".detailsoverlay .rightcolumn .status").setAttribute("class", `status ${task.status}`)
+                document.querySelector(".detailsoverlay .rightcolumn .status div").innerText = (task.status === "inprogress" ? "in progress" : task.status)
+                document.querySelector(".detailsoverlay .rightcolumn .createdat").innerText = formatTimestamp(task.createdat)
+                document.querySelector(".detailsoverlay .rightcolumn .startedat").innerText = task.startedat ? formatTimestamp(task.startedat) : ""
+                document.querySelector(".detailsoverlay .rightcolumn .completedat").innerText = task.completedat ? formatTimestamp(task.completedat) : ""
+                var duration = task.completedat ? Math.round((task.completedat - task.createdat) / 1000) : undefined
+                document.querySelector(".detailsoverlay .rightcolumn .duration div").innerText = duration ? formatDuration(duration) : "-"
+                document.querySelector(".detailsoverlay button.restart").onclick = async () => {
+                    await fetch(`${apiroot}/restart/${taskid}`)
+                    await showTaskDetails(taskid)
+                }
+                document.querySelector(".detailsoverlay button.delete").onclick = async () => {
+                    if (!confirm("Really delete?")) return
+                    await fetch(`${apiroot}/remove/${taskid}`, { method: 'DELETE' })
+                    await loadTasks()
+                    document.querySelector('.detailsoverlay').style.display = 'none'
+                }
                 document.querySelector(".detailsoverlay").style.display = "block"
+
+            }
+
+            function calculateHue(text) {
+                var hash = 0;
+                for (var i = 0; i < text.length; i++) {
+                    hash = (hash << 5) - hash + text.charCodeAt(i);
+                    hash |= 0; // Convert to 32bit integer
+                }
+                return Math.abs(hash) % 360;
+            }
+
+            function formatTimestamp(timestamp) {
+                return (new Date(timestamp)).toLocaleString()
             }
 
             function formatDuration(duration) {
@@ -100,8 +131,9 @@
                 if (green < 0) green = 0
                 var red = Math.round(duration / factor)
                 if (red > 255) red = 255
-                var color = `rgb(${red},${green}, 0)`
-                taskDiv.innerHTML = `<div class="tasktitle">${task.id}</div><div class="tasktype ${task.type}"><div>${task.type}</div></div><div class="taskduration"><div style="border-color:${color}">${formattedDuration}</div></div><div class="taskworker"><div>${task.worker || ""}</div></div>`
+                var durationColor = `rgb(${red},${green}, 0)`
+                var typeColor = `hsl(${calculateHue(task.type)}deg 50% 50%)`
+                taskDiv.innerHTML = `<div class="tasktitle">${task.id}</div><div class="tasktype"><div style="background-color:${typeColor}">${task.type}</div></div><div class="taskduration"><div style="border-color:${durationColor}">${formattedDuration}</div></div><div class="taskworker"><div>${task.worker || ""}</div></div>`
                 taskDiv.addEventListener("click", () => showTaskDetails(task.id))
                 return taskDiv;
             }
@@ -163,8 +195,8 @@
             <div class="dialog">
 
                 <div class="header">
-                    <div class="title">36b8f84d-df4e-4d49-b662-bcde71a8764f</div>
-                    <button class="close" onclick="document.querySelector('.detailsoverlay').style.display = 'none';">✖</button>
+                    <div class="title"></div>
+                    <button class="close" onclick="document.querySelector('.detailsoverlay').style.display = 'none'">✖</button>
                 </div>
 
                 <div class="content">
@@ -172,50 +204,14 @@
                     <div class="leftcolumn">
 
                         <div class="buttonrow">
-                            <button class="download">Download</button>
+                            <!--<button class="download">Download</button> See https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript -->
                             <button class="restart">Restart</button>
                             <button class="delete">Delete</button>
                         </div>
 
                         <h1>Data</h1>
 
-                        <div class="rawdata data">{
-                            "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-                            "type": "translate",
-                            "status": "open",
-                            "createdat": 1717394497292,
-                            "startedat": 1717395321826,
-                            "completedat": 1717395345196,
-                            "requirements": {
-                                "sourcelanguage": "en",
-                                "targetlanguage": "de"
-                            },
-                            "data": { ... },
-                            "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-                            "type": "translate",
-                            "status": "open",
-                            "createdat": 1717394497292,
-                            "startedat": 1717395321826,
-                            "completedat": 1717395345196,
-                            "requirements": {
-                                "sourcelanguage": "en",
-                                "targetlanguage": "de"
-                            },
-                            "id": "36b8f84d-df4e-4d49-b frewght4w hze z5e jh5e hz65e jhz5 ezh662-bcde71a8764f",
-                            "type": "translate",
-                            "status": "open",
-                            "createdat": 1717394497292,
-                            "startedat": 1717395321826,
-                            "completedat": 1717395345196,
-                            "requirements": {
-                                "sourcelanguage": "en",
-                                "targetlanguage": "de"
-                            },
-                            "data": { ... },
-                                                    "data": { ... },
-                                                    "result": { ... }
-}
-                        </div>
+                        <div class="rawdata data"></div>
 
                         <h1>Result</h1>
 
@@ -228,32 +224,32 @@
 
                         <table>
                             <tr>
-                                <th>ID</th>
-                                <td class="id">36b8f84d-df4e-4d49-b662-bcde71a8764f</td>
-                            </tr>
-                            <tr>
                                 <th>Type</th>
-                                <td class="tasktype translate"><div>Translate</div></td>
+                                <td class="tasktype"><div></div></td>
                             </tr>
                             <tr>
                                 <th>Worker</th>
-                                <td class="worker">RH_WORKBOOK</td>
+                                <td class="worker"></td>
                             </tr>
                             <tr>
                                 <th>Status</th>
-                                <td class="status inprogress"><div>In Progress</div></td>
+                                <td class="status inprogress"><div></div></td>
                             </tr>
                             <tr>
                                 <th>Created at</th>
-                                <td class="datetime createdat">99.99.9999 99:99:99</td>
+                                <td class="datetime createdat"></td>
                             </tr>
                             <tr>
                                 <th>Started at</th>
-                                <td class="datetime startedat">99.99.9999 99:99:99</td>
+                                <td class="datetime startedat"></td>
                             </tr>
                             <tr>
                                 <th>Completed at</th>
-                                <td class="datetime completedat">99.99.9999 99:99:99</td>
+                                <td class="datetime completedat"></td>
+                            </tr>
+                            <tr>
+                                <th>Duration</th>
+                                <td class="duration"><div></div></td>
                             </tr>
                         </table>
 
