@@ -8,54 +8,19 @@
         <link rel="manifest" href="/site.webmanifest">
         <style>
 
-            * { margin: 0; padding: 0; font-family: sans-serif; font-size: 12pt; color: #1e2f55; }
+            * { margin: 0; padding: 0; font-family: sans-serif; font-size: 12pt; color: #1e2f55; box-sizing: border-box; }
             html, body { width: 100%; height: 100%; overflow: hidden; }
             body { display: flex; }
             iframe { flex: 1; border: none; }
 
-            .navigation {
-                background-color: #eff1f3;
-                padding: 16px;
-            }
-
-            .navigation .header {
-                margin-bottom: 16px;
-            }
-
-            .navigation .header .title {
-                font-weight: bold;
-                margin-top: 6px;
-            }
-
-            .navigation .header .subtitle {
-                font-weight: bold;
-                font-size: 9pt;
-                color: #69768e;
-                margin-bottom: 6px;
-            }
-
-            .navigation .links input {
-                display: none;
-            }
-
-            .navigation .links label {
-                color: #627088;
-                display: block;
-                padding: 9px 11px;
-                text-decoration: none;
-                border-radius: 4px;
-                user-select: none;
-            }
-
-            .navigation .links label:hover {
-                background-color: #e5e8ec;
-                cursor: pointer;
-            }
-
-            .navigation .links input:checked+label {
-                color: #0445ae;
-                background-color: #e5e8ec;
-            }
+            .navigation { background-color: #eff1f3; padding: 16px; }
+            .navigation .header { margin-bottom: 16px; background: url(/android-chrome-192x192.png) no-repeat left center; background-size: contain; padding-left: 40px; }
+            .navigation .header .title { font-weight: bold; margin-top: 6px; }
+            .navigation .header .subtitle { font-weight: bold; font-size: 9pt; color: #69768e; margin-bottom: 6px; }
+            .navigation .links input { display: none; }
+            .navigation .links label { color: #627088; display: block; padding: 9px 11px; text-decoration: none; border-radius: 4px; user-select: none; }
+            .navigation .links label:hover { background-color: #e5e8ec; cursor: pointer; }
+            .navigation .links input:checked+label { color: #0445ae; background-color: #e5e8ec; }
 
         </style>
     </head>

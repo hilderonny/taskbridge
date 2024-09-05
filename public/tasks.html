@@ -1,33 +1,113 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script type="module" src="scripts/main.js"></script>
+        <style>
+
+            * { margin: 0; padding: 0; font-family: sans-serif; font-size: 12pt; color: #1e2f55; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; }
+            body { padding: 32px 16px 32px 32px; display: flex; flex-direction: column; }
+
+            h1 { font-size: 24pt; margin-bottom: 24px; }
+
+            .board { display: flex; flex-direction: row; flex: 1; overflow: hidden; max-height: 100%; }
+
+            .board .lane { flex: 1; margin-right: 16px; background-color: #f1f3f5; border-radius: 3px; padding: 8px; display: flex; flex-direction: column; overflow: hidden; max-height: 100%; }
+
+            .board .lane .lanetitle { margin: 4px 0 12px 0; font-weight: bold; color: #727d94; text-transform: uppercase; font-size: 10pt; }
+
+            .board .lane .lanetitle .counter { font-weight: normal; color: #727d94; font-size: 10pt; }
+
+            .board .lane .tasks { flex: 1; overflow: auto; }
+
+            .board .lane .tasks .task { background-color: #fff; box-shadow: 0px 0px 1px 2px #eaebed; border-radius: 3px; padding: 16px; color: #233559; display: grid; grid-template-areas: 'title title title' 'type duration worker'; }
+
+            .board .lane .tasks .task .tasktitle { grid-area: title; padding-bottom: 16px; }
+            .board .lane .tasks .task .tasktype { grid-area: type; }
+            .board .lane .tasks .task .tasktype div { display: inline-block; font-weight: bold; border-radius: 3px; padding: 2px 4px; text-transform: uppercase; font-size: 9pt; }
+            .board .lane .tasks .task .tasktype.classifyimage div { color: #12284d; background-color: #ffc300; }
+            .board .lane .tasks .task .tasktype.scanforvirus div { color: #ffffff; background-color: #f08000; }
+            .board .lane .tasks .task .tasktype.translate div { color: #ffffff; background-color: #4fcbdf; }
+            .board .lane .tasks .task .tasktype.transcribe div { color: #ffffff; background-color: #6554c0; }
+            .board .lane .tasks .task .taskduration { grid-area: duration; text-align: center; }
+            .board .lane .tasks .task .taskduration div { display: inline-block; font-weight: bold; color: #112246; background-color: #eceef1; border: 1px solid; border-radius: 8px; padding: 2px 6px; font-size: 9pt; }
+            .board .lane .tasks .task .taskworker { grid-area: worker; text-align: right; }
+            .board .lane .tasks .task .taskworker div { display: inline-block; font-weight: bold; color: #a2abbf; padding: 2px 6px; text-transform: uppercase; font-size: 9pt; }
+
+        </style>
+        <script type="module">
+
+            var tasktablebody = document.getElementById("tasks")
+
+            async function deletetask(taskid) {
+                await fetch("/api/tasks/remove/" + taskid, { method: 'DELETE' })
+                loadTasks()
+            }
+
+            function formatDuration(duration) {
+                var hours = Math.floor(duration / 3600)
+                var minutes = Math.floor((duration - (hours * 3600)) / 60)
+                var seconds = duration - (minutes * 60) - (hours * 3600)
+                var durationText = `${hours ? hours + "h " : ""}${minutes ? minutes + "m " : ""}${seconds}s`
+                return durationText
+            }
+
+            function createDivForTask(task) {
+                var duration = Math.round((Date.now() - task.createdat) / 1000)
+                var formattedDuration = formatDuration(duration)
+                var taskDiv = document.createElement("div")
+                taskDiv.classList.add("task")
+                var factor = 12
+                var green = Math.round(255 - duration / factor)
+                if (green < 0) green = 0
+                var red = Math.round(duration / factor)
+                if (red > 255) red = 255
+                var color = `rgb(${red},${green}, 0)`
+                taskDiv.innerHTML = `<div class="tasktitle">${task.id}</div><div class="tasktype ${task.type}"><div>${task.type}</div></div><div class="taskduration"><div style="border-color:${color}">${formattedDuration}</div></div><div class="taskworker"><div>${task.worker || ""}</div></div>`
+                return taskDiv;
+            }
+
+            async function loadTasks() {
+                const result = await fetch("/api/tasks/list/")
+                const tasks = await result.json()
+                //console.log(tasks)
+                document.querySelectorAll(".board .lane .tasks").forEach(node => node.innerText = "")
+                for (const task of tasks) {
+                    var taskDiv = createDivForTask(task)
+                    document.querySelector(`.board .lane.${task.status} .tasks`).appendChild(taskDiv)
+                }
+            }
+
+            async function load() {
+                await loadTasks()
+            }
+
+            setInterval(load, 1000)
+            load()
+
+        </script>
     </head>
     <body>
 
-        <h1>Task Bridge</h1>
+        <h1>Tasks</h1>
 
-        <p id="time"></p>
+        <div class="board">
 
-        <p>
-            <a href="translate.html">Translate</a>
-        </p>
+            <div class="lane open">
+                <div class="lanetitle">Open <span id="opentaskcounter" class="counter">999</span></div>
+                <div class="tasks"></div>
+            </div>
 
-        <h2>Tasks</h2>
+            <div class="lane inprogress">
+                <div class="lanetitle">In Progress <span id="inprogresstaskcounter" class="counter">999</span></div>
+                <div class="tasks"></div>
+            </div>
 
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Type</th>
-                    <th>Status</th>
-                    <th>Duration</th>
-                    <th>Worker</th>
-                    <th colspan="4">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="tasks"></tbody>
-        </table>
+            <div class="lane completed">
+                <div class="lanetitle">Completed <span id="completedtaskcounter" class="counter">999</span></div>
+                <div class="tasks"></div>
+            </div>
+            
+        </div>
             
     </body>
 </html>
