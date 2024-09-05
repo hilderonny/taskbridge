@@ -227,6 +227,29 @@ Response
 {
     "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
     "type": "translate",
+    "worker": "ROG",
+    "status": "open",
+    "createdat": 1717394497292,
+    "startedat": 1717395321826,
+    "completedat": 1717395345196,
+    "requirements": { ... },
+    "data": { ... },
+    "result": { ... }
+}
+```
+
+## Get all details of a task
+
+```
+GET /api/tasks/details/:id
+```
+
+Response
+
+```json
+{
+    "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
+    "type": "translate",
     "status": "open",
     "createdat": 1717394497292,
     "startedat": 1717395321826,
@@ -268,3 +291,6 @@ Response
 ## References
 
 1. [Nodes icons created by Kalashnyk - Flaticon](https://www.flaticon.com/free-icons/nodes)
+2. [Download icons created by Debi Alpa Nugraha - Flaticon](https://www.flaticon.com/free-icons/download)
+3. [Refresh icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/refresh)
+4. [Garbage can icons created by pictranoosa - Flaticon](https://www.flaticon.com/free-icons/garbage-can)

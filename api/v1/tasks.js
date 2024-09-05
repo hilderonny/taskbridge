@@ -151,6 +151,16 @@ apiRouter.get('/result/:id', function(req, res) {
     }
 })
 
+// Get all details of a task
+apiRouter.get('/details/:id', function(req, res) {
+    var matchingTask = findTask(req.params.id)
+    if (!matchingTask) {
+        res.status(404).send()
+    } else {
+        res.status(200).send(matchingTask)
+    }
+})
+
 // List all tasks
 apiRouter.get("/list/", function(_, res) {
     var filteredtasks = tasks.map(function(task) {
