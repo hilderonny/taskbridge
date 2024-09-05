@@ -37,9 +37,10 @@
         <script type="module">
 
             var tasktablebody = document.getElementById("tasks")
+            var apiroot = "/api/v1/tasks"
 
             async function deletetask(taskid) {
-                await fetch("/api/tasks/remove/" + taskid, { method: 'DELETE' })
+                await fetch(`${apiroot}/remove/${taskid}`, { method: 'DELETE' })
                 loadTasks()
             }
 
@@ -67,7 +68,7 @@
             }
 
             async function loadTasks() {
-                const result = await fetch("/api/tasks/list/")
+                const result = await fetch(`${apiroot}/list/`)
                 const tasks = await result.json()
                 //console.log(tasks)
                 document.querySelectorAll(".board .lane .tasks").forEach(node => node.innerText = "")
