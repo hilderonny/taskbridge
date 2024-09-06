@@ -18,9 +18,12 @@
             .navigation .header .title { font-weight: bold; margin-top: 6px; }
             .navigation .header .subtitle { font-weight: bold; font-size: 9pt; color: #69768e; margin-bottom: 6px; }
             .navigation .links input { display: none; }
-            .navigation .links label { color: #627088; display: block; padding: 9px 11px; text-decoration: none; border-radius: 4px; user-select: none; }
+            .navigation .links label { color: #627088; display: block; padding: 9px 11px 9px 30px; text-decoration: none; border-radius: 4px; user-select: none; background: no-repeat 9px center; background-size: 16px; }
             .navigation .links label:hover { background-color: #e5e8ec; cursor: pointer; }
             .navigation .links input:checked+label { color: #0445ae; background-color: #e5e8ec; }
+            #link-workers+label { background-image: url(/images/network.png) }
+            #link-tasks+label { background-image: url(/images/clipboard.png) }
+            #link-translate+label { background-image: url(/images/translation.png) }
 
         </style>
     </head>
@@ -36,6 +39,7 @@
             <div class="links">
                 <input type="radio" id="link-workers" name="link" onclick="self.frames['content'].location.href='workers.html'"><label for="link-workers">Workers</label>
                 <input type="radio" id="link-tasks" name="link" checked onclick="self.frames['content'].location.href='tasks.html'"><label for="link-tasks">Tasks</label>
+                <input type="radio" id="link-translate" name="link" onclick="self.frames['content'].location.href='translate.html'"><label for="link-translate">Translate</label>
             </div>
 
         </div>
