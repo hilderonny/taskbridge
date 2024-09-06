@@ -319,3 +319,4 @@ Response
 5. [Links icons created by meaicon - Flaticon](https://www.flaticon.com/free-icons/links)
 6. [List icons created by Kiranshastry - Flaticon](https://www.flaticon.com/free-icons/list)
 7. [Translation icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/translation)
+8. [Transcription icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/transcription)

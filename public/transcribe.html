@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+
+            * { margin: 0; padding: 0; font-family: sans-serif; font-size: 12pt; color: #1e2f55; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; }
+            body { padding: 32px 16px 32px 32px; display: flex; flex-direction: column; }
+
+            h1 { font-size: 24pt; margin-bottom: 24px; }
+
+            .uploadarea {
+                width: 300px;
+                height: 200px;
+                border: 2px dashed #ccc;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                font-family: Arial, sans-serif;
+                color: #ccc;
+                cursor: pointer;
+            }
+            .uploadarea.dragover {
+                border-color: #333;
+                color: #333;
+            }
+            #fileInput { display: none; }
+
+
+        </style>
+        <script type="module">
+
+            const uploadArea = document.querySelector(".uploadarea");
+            const fileInput = document.querySelector("#fileInput");
+
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (event) => {
+                handleFiles(event.target.files);
+            });
+
+            uploadArea.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (event) => {
+                event.preventDefault();
+                uploadArea.classList.remove('dragover');
+                handleFiles(event.dataTransfer.files);
+            });
+
+            function handleFiles(files) {
+                for (const file of files) {
+                    console.log('Datei hochgeladen:', file.name)
+                    uploadArea.innerText = file.name
+                }
+            }
+
+        </script>
+    </head>
+    <body>
+
+        <h1>Transcribe</h1>
+
+        <div class="uploadarea">Drop media file here or click to select</div>
+        <input type="file" id="fileInput">
+
+        <button>Transcribe</button>
+
+        <h2>Result</h2>
+
+        <div class="result"></div>
+
+    </body>
+</html>

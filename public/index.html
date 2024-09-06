@@ -23,6 +23,7 @@
             .navigation .links input:checked+label { color: #0445ae; background-color: #e5e8ec; }
             #link-workers+label { background-image: url(/images/network.png) }
             #link-tasks+label { background-image: url(/images/clipboard.png) }
+            #link-transcribe+label { background-image: url(/images/transcription.png) }
             #link-translate+label { background-image: url(/images/translation.png) }
 
         </style>
@@ -53,6 +54,7 @@
             <div class="links">
                 <input type="radio" id="link-workers" name="link" onclick="self.frames['content'].location.href='workers.html'"><label for="link-workers">Workers</label>
                 <input type="radio" id="link-tasks" name="link" checked onclick="self.frames['content'].location.href='tasks.html'"><label for="link-tasks">Tasks</label>
+                <input type="radio" id="link-transcribe" name="link" onclick="self.frames['content'].location.href='transcribe.html'"><label for="link-transcribe">Transcribe</label>
                 <input type="radio" id="link-translate" name="link" onclick="self.frames['content'].location.href='translate.html'"><label for="link-translate">Translate</label>
             </div>
 
