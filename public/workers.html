@@ -46,7 +46,7 @@
             async function loadWorkers() {
                 var result = await fetch(`${apiroot}/list/`)
                 var workers = await result.json()
-                var html = workers.map(worker => `<tr><td>${worker.name}</td><td class="tasktype"><div style="background-color:hsl(${calculateHue(worker.type)}deg 50% 50%)">${worker.type}</div></td><td class="status ${worker.status}"><div>${worker.status}</div></td><td>${worker.taskid || ""}</td><td class="duration"><div>${formatDuration(worker.lastping)}</div></td></tr>`).join("")
+                var html = workers.map(worker => `<tr><td>${worker.name}</td><td class="tasktype"><div style="background-color:hsl(${calculateHue(worker.type)}deg 50% 50%)">${worker.type}</div></td><td class="status ${worker.status}"><div>${worker.status}</div></td><td><a target="_parent" href="index.html?task=${worker.taskid}">${worker.taskid || ""}</a></td><td class="duration"><div>${formatDuration(worker.lastping)}</div></td></tr>`).join("")
                 tableBody.innerHTML = html
             }
 

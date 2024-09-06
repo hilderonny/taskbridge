@@ -26,6 +26,20 @@
             #link-translate+label { background-image: url(/images/translation.png) }
 
         </style>
+        
+        <script type="module">
+
+            if (location.search) {
+                var params = location.search.substring(1).split("=")
+                if (params[0] === "task") {
+                    self.frames['content'].location.href=`tasks.html?${params[1]}`
+                    document.querySelector("#link-tasks").checked = true
+                }
+                delete location.search
+            }
+
+        </script>
+
     </head>
     <body>
 

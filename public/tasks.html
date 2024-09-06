@@ -49,7 +49,7 @@
             .detailsoverlay .dialog .content .leftcolumn .buttonrow button.delete:hover { background-color: #ebc0bd; }
 
             .detailsoverlay .dialog .content .leftcolumn h1 { font-size: 18pt; font-weight: normal; margin-top: 20px; margin-bottom: 12px; }
-            .detailsoverlay .dialog .content .leftcolumn .rawdata { padding: 8px; border: 1px solid #eeeeee; overflow: auto; font-family: monospace; white-space: pre-wrap; }
+            .detailsoverlay .dialog .content .leftcolumn .rawdata { padding: 8px; border: 1px solid #eeeeee; overflow: auto; font-family: monospace; white-space: pre-wrap; line-break: anywhere; }
 
             .detailsoverlay .dialog .content .rightcolumn { margin-top: 8px; margin-left: 40px; color: #4e5d76; }
             .detailsoverlay .dialog .content .rightcolumn h1 { font-size: 12pt; font-weight: normal; display: block; padding: 16px; border: 1px solid #eeeeee; border-radius: 3px 3px 0 0; margin: 0;  }
@@ -163,6 +163,12 @@
 
             setInterval(load, 1000)
             load()
+
+            if (location.search) {
+                var taskid = location.search.substring(1)
+                showTaskDetails(taskid)
+            }
+
 
         </script>
     </head>
