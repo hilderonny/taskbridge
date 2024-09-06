@@ -10,13 +10,15 @@
             h1 { font-size: 24pt; margin-bottom: 24px; }
 
             .content { flex: 1; display: flex; flex-direction: row; }
-            .content .input { flex: 1; border: 1px solid #888888; box-shadow: 0px 0px 3px 0px #888888 inset; padding: 4px; }
+            .content .input { flex: 1; border: 1px solid #888888; box-shadow: 0px 0px 3px 0px #888888 inset; padding: 4px; line-break: anywhere; }
             .content .input::placeholder { color: #aaaaaa; }
             .content .transfer { padding: 16px; display: flex; flex-direction: column; justify-content: center; }
+            .content .transfer h2 { font-weight: normal; margin: 16px 0 8px 0; }
+            .content .transfer .sourcelanguage { padding: 8px; width: 120px; }
             .content .transfer select { padding: 8px; cursor: pointer; }
             .content .transfer button { background: #f1f2f4; border: none; border-radius: 3px; padding: 8px; cursor: pointer; margin-top: 16px; }
             .content .transfer button:hover { background-color: #d5d6d8; }
-            .content .output { flex: 1; border: 1px solid #dddddd; padding: 4px; }
+            .content .output { flex: 1; border: 1px solid #dddddd; padding: 4px; line-break: anywhere; }
 
         </style>
         <script type="module">
@@ -35,6 +37,7 @@
                     targetdiv.innerHTML = translatedtexts.map(el => `<span title="${el.language || ""}">${el.text}</span>`).join("<br/>")
                     await fetch("/api/v1/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
                     localStorage.removeItem("translate-input")
+                    localStorage.removeItem("translate-sourcelanguage")
                     localStorage.removeItem("translate-targetlanguage")
                     localStorage.removeItem("translate-taskidtowaitfor")
                     clearInterval(intervalid)
@@ -49,7 +52,16 @@
 
                 var input = document.querySelector(".content .input").value
                 var sourcetexts = input.split("\n")
+                var sourcelanguage = document.querySelector(".content .sourcelanguage").value
                 var targetlanguage = document.querySelector(".content .targetlanguage").value
+                var body = {
+                    type: "translate",
+                    data: {
+                        targetlanguage: targetlanguage,
+                        texts: sourcetexts
+                    }
+                }
+                if (sourcelanguage && sourcelanguage.length > 0) body.data.sourcelanguage = sourcelanguage
 
                 var addresponse = await fetch("/api/v1/tasks/add/", {
                     method: "POST",
@@ -57,18 +69,13 @@
                         "Accept": "application/json",
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({
-                        type: "translate",
-                        data: {
-                            targetlanguage: targetlanguage,
-                            texts: sourcetexts
-                        }
-                    })
+                    body: JSON.stringify(body)
                 })
                 var addresult = await addresponse.json()
                 taskidtowaitfor = addresult.id
 
                 localStorage.setItem("translate-input", input)
+                localStorage.setItem("translate-sourcelanguage", sourcelanguage)
                 localStorage.setItem("translate-targetlanguage", targetlanguage)
                 localStorage.setItem("translate-taskidtowaitfor", taskidtowaitfor)
 
@@ -81,6 +88,8 @@
 
             var lastinput = localStorage.getItem("translate-input")
             if (lastinput) document.querySelector(".content .input").value = lastinput
+            var lastsourcelanguage = localStorage.getItem("translate-sourcelanguage")
+            if (lastsourcelanguage) document.querySelector(".content .sourcelanguage").value = lastsourcelanguage
             var lasttargetlanguage = localStorage.getItem("translate-targetlanguage")
             if (lasttargetlanguage) document.querySelector(".content .targetlanguage").value = lasttargetlanguage
             var lasttaskidtowaitfor = localStorage.getItem("translate-taskidtowaitfor")
@@ -101,6 +110,9 @@
         <div class="content">
             <textarea class="input" placeholder="Please input the text to translate here ..."></textarea>
             <div class="transfer">
+                <h2>From</h2>
+                <input class="sourcelanguage" placeholder="Optional"/>
+                <h2>To</h2>
                 <select class="targetlanguage">
                     <option value="ar">ar</option>
                     <option value="de" selected>de</option>
