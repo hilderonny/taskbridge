@@ -280,7 +280,29 @@ Response
         "createdat": 1717394497292,
         "startedat": 1717395321826,
         "completedat": 1717395345196
-    }
+    },
+    ...
+]
+```
+
+## List all workers
+
+```
+GET /api/workers/list/
+```
+
+Response
+
+```json
+[
+    {
+        "name": "RH-WORKBOOK",
+        "type": "translate",
+        "status": "idle",
+        "taskid": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
+        "lastping": 292
+    },
+    ...
 ]
 ```
 

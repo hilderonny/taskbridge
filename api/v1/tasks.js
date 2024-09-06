@@ -3,11 +3,13 @@ var SAVEINTERVAL = process.env.SAVEINTERVAL
 
 var fs = require("fs")
 var crypto = require("crypto")
+var express = require("express")
+var workersApi = require("./workers")
+
 var tasks = []
 var isDirty = false // Flag for signalling that the tasks have changed since last file save
 
-var express = require("express")
-const apiRouter = express.Router()
+var apiRouter = express.Router()
 
 // Load tasks file or create a new one
 fs.readFile(TASKFILE, "utf8", (error, data) => {
@@ -75,6 +77,7 @@ apiRouter.post('/take/', function(req, res) {
         }
         return true
     })
+    workersApi.notifyAboutWorker(worker, type, firstMatchingTask ? "working" : "idle", firstMatchingTask ? firstMatchingTask.id : undefined)
     if (!firstMatchingTask) {
         res.status(404).send()
     } else {

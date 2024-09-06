@@ -141,7 +141,6 @@
             async function loadTasks() {
                 const result = await fetch(`${apiroot}/list/`)
                 const tasks = await result.json()
-                //console.log(tasks)
                 document.querySelectorAll(".board .lane .tasks").forEach(node => node.innerText = "")
                 var opencounter = 0
                 var inprogresscounter = 0
