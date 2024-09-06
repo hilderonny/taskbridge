@@ -34,6 +34,9 @@
                     var translatedtexts = json.result.texts
                     targetdiv.innerHTML = translatedtexts.map(el => `<span title="${el.language || ""}">${el.text}</span>`).join("<br/>")
                     await fetch("/api/v1/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
+                    localStorage.removeItem("translate-input")
+                    localStorage.removeItem("translate-targetlanguage")
+                    localStorage.removeItem("translate-taskidtowaitfor")
                     clearInterval(intervalid)
                     intervalid = undefined
                 } else {
@@ -44,7 +47,8 @@
 
             async function translate() {
 
-                var sourcetexts = document.querySelector(".content .input").value.split("\n")
+                var input = document.querySelector(".content .input").value
+                var sourcetexts = input.split("\n")
                 var targetlanguage = document.querySelector(".content .targetlanguage").value
 
                 var addresponse = await fetch("/api/v1/tasks/add/", {
@@ -64,11 +68,26 @@
                 var addresult = await addresponse.json()
                 taskidtowaitfor = addresult.id
 
+                localStorage.setItem("translate-input", input)
+                localStorage.setItem("translate-targetlanguage", targetlanguage)
+                localStorage.setItem("translate-taskidtowaitfor", taskidtowaitfor)
+
                 if (!intervalid) {
                     intervalid = setInterval(waiter, 1000)
                 }
                 waiter()
 
+            }
+
+            var lastinput = localStorage.getItem("translate-input")
+            if (lastinput) document.querySelector(".content .input").value = lastinput
+            var lasttargetlanguage = localStorage.getItem("translate-targetlanguage")
+            if (lasttargetlanguage) document.querySelector(".content .targetlanguage").value = lasttargetlanguage
+            var lasttaskidtowaitfor = localStorage.getItem("translate-taskidtowaitfor")
+            if (lasttaskidtowaitfor) {
+                taskidtowaitfor = lasttaskidtowaitfor
+                intervalid = setInterval(waiter, 1000)
+                waiter()
             }
 
             document.querySelector(".content .transfer .start").addEventListener("click", translate)
