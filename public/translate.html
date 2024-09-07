@@ -63,13 +63,12 @@
                 }
                 if (sourcelanguage && sourcelanguage.length > 0) body.data.sourcelanguage = sourcelanguage
 
+                var formData = new FormData()
+                formData.append('json', JSON.stringify(body))
+
                 var addresponse = await fetch("/api/v2/tasks/add/", {
                     method: "POST",
-                    headers: {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(body)
+                    body: formData
                 })
                 var addresult = await addresponse.json()
                 taskidtowaitfor = addresult.id
