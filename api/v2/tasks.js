@@ -59,7 +59,6 @@ apiRouter.post("/add/", upload.single('file'), function(req, res) {
     if (json.data) task.data = json.data
     if (json.requirements) task.requirements = json.requirements
     if (req.file) task.file = req.file.filename
-    console.log(task)
     tasks.push(task)
     isDirty = true
     res.status(200).send({
@@ -68,11 +67,10 @@ apiRouter.post("/add/", upload.single('file'), function(req, res) {
 })
 
 // Take a task for processing
-apiRouter.post('/take/', function(req, res) {
-    var json = JSON.parse(req.body.json)
-    var type = json.type
-    var worker = json.worker
-    var abilities = json.abilities || {}
+apiRouter.post('/take/', express.json(), function(req, res) {
+    var type = req.body.type
+    var worker = req.body.worker
+    var abilities = req.body.abilities || {}
     var firstMatchingTask = tasks.find(function(task) {
         if (task.status !== "open") return false
         if (task.type !== type) return false
@@ -101,13 +99,12 @@ apiRouter.post('/take/', function(req, res) {
 })
 
 // Report task completion
-apiRouter.post('/complete/:id', function(req, res) {
-    var json = JSON.parse(req.body.json)
+apiRouter.post('/complete/:id', express.json(), function(req, res) {
     var matchingTask = findTask(req.params.id)
     if (!matchingTask) {
         res.status(404).send()
     } else {
-        matchingTask.result = json.result
+        matchingTask.result = req.body.result
         matchingTask.completedat = Date.now()
         matchingTask.status = "completed"
         isDirty = true
@@ -123,6 +120,10 @@ apiRouter.delete('/remove/:id', function(req, res) {
     } else {
         tasks.splice(tasks.indexOf(matchingTask), 1)
         isDirty = true
+        if (matchingTask.file) {
+            var fullpath = path.join(FILEPATH, matchingTask.file)
+            fs.rmSync(fullpath)
+        }
         res.status(200).send()
     }
 })
@@ -190,7 +191,6 @@ apiRouter.get("/file/:id", function(req, res) {
 
 // List all tasks
 apiRouter.get("/list/", function(_, res) {
-    console.log(tasks)
     var filteredtasks = tasks.map(function(task) {
         return {
             id: task.id,
