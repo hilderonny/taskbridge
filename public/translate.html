@@ -28,14 +28,14 @@
             var targetdiv = document.querySelector(".content .output")
 
             async function waiter() {
-                var statusresponse = await fetch("/api/v1/tasks/status/" + taskidtowaitfor)
+                var statusresponse = await fetch("/api/v2/tasks/status/" + taskidtowaitfor)
                 var statusresult = await statusresponse.json()
                 if (statusresult.status === "completed") {
-                    var resultresponse = await fetch("/api/v1/tasks/result/" + taskidtowaitfor)
+                    var resultresponse = await fetch("/api/v2/tasks/result/" + taskidtowaitfor)
                     var json = await resultresponse.json()
                     var translatedtexts = json.result.texts
                     targetdiv.innerHTML = translatedtexts.map(el => `<span title="${el.language || ""}">${el.text}</span>`).join("<br/>")
-                    await fetch("/api/v1/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
+                    await fetch("/api/v2/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
                     localStorage.removeItem("translate-input")
                     localStorage.removeItem("translate-sourcelanguage")
                     localStorage.removeItem("translate-targetlanguage")
@@ -63,7 +63,7 @@
                 }
                 if (sourcelanguage && sourcelanguage.length > 0) body.data.sourcelanguage = sourcelanguage
 
-                var addresponse = await fetch("/api/v1/tasks/add/", {
+                var addresponse = await fetch("/api/v2/tasks/add/", {
                     method: "POST",
                     headers: {
                         "Accept": "application/json",

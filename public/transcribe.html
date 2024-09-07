@@ -8,62 +8,77 @@
             body { padding: 32px 16px 32px 32px; display: flex; flex-direction: column; }
 
             h1 { font-size: 24pt; margin-bottom: 24px; }
+            h2 { font-size: 18pt; font-weight: normal; margin-bottom: 12px; }
 
-            .uploadarea {
-                width: 300px;
-                height: 200px;
-                border: 2px dashed #ccc;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                font-family: Arial, sans-serif;
-                color: #ccc;
-                cursor: pointer;
-            }
-            .uploadarea.dragover {
-                border-color: #333;
-                color: #333;
-            }
-            #fileInput { display: none; }
+
+            input { border: 1px dashed #888888; margin: 0 auto; padding: 40px; border-radius: 5px; background: #fafafa; }
+            button { background: #f1f2f4; border: none; border-radius: 3px; padding: 8px; cursor: pointer; margin: 16px auto; }
+            button:hover { background-color: #d5d6d8; }
+
+            .result { flex: 1; border: 1px solid #dddddd; padding: 4px; line-break: anywhere; }
 
 
         </style>
         <script type="module">
 
-            const uploadArea = document.querySelector(".uploadarea");
-            const fileInput = document.querySelector("#fileInput");
+            var taskidtowaitfor = undefined
+            var intervalid = undefined
+            var targetdiv = document.querySelector(".result")
 
-            uploadArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            fileInput.addEventListener('change', (event) => {
-                handleFiles(event.target.files);
-            });
-
-            uploadArea.addEventListener('dragover', (event) => {
-                event.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-
-            uploadArea.addEventListener('drop', (event) => {
-                event.preventDefault();
-                uploadArea.classList.remove('dragover');
-                handleFiles(event.dataTransfer.files);
-            });
-
-            function handleFiles(files) {
-                for (const file of files) {
-                    console.log('Datei hochgeladen:', file.name)
-                    uploadArea.innerText = file.name
+            async function waiter() {
+                var statusresponse = await fetch("/api/v2/tasks/status/" + taskidtowaitfor)
+                var statusresult = await statusresponse.json()
+                if (statusresult.status === "completed") {
+                    var resultresponse = await fetch("/api/v2/tasks/result/" + taskidtowaitfor)
+                    var json = await resultresponse.json()
+                    var texts = json.result.texts
+                    targetdiv.innerHTML = texts.join("<br/>")
+                    await fetch("/api/v2/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
+                    localStorage.removeItem("transcribe-taskidtowaitfor")
+                    clearInterval(intervalid)
+                    intervalid = undefined
+                } else {
+                    targetdiv.innerText = `Waiting for result of task ${taskidtowaitfor} (${statusresult.status}) ...`
                 }
             }
+
+            async function transcribe() {
+
+                var file = document.querySelector(".file").files[0]
+                var json = {
+                    type: "transcribe"
+                }
+
+                var formData = new FormData()
+                formData.append('file', file)
+                formData.append('json', JSON.stringify(json))
+
+                targetdiv.innerText = `Uploading file ${file.name} ...`
+                
+                var addresponse = await fetch("/api/v2/tasks/add/", {
+                    method: "POST",
+                    body: formData
+                })
+                var addresult = await addresponse.json()
+                taskidtowaitfor = addresult.id
+
+                localStorage.setItem("transcribe-taskidtowaitfor", taskidtowaitfor)
+
+                if (!intervalid) {
+                    intervalid = setInterval(waiter, 1000)
+                }
+                waiter()
+
+            }
+
+            var lasttaskidtowaitfor = localStorage.getItem("transcribe-taskidtowaitfor")
+            if (lasttaskidtowaitfor) {
+                taskidtowaitfor = lasttaskidtowaitfor
+                intervalid = setInterval(waiter, 1000)
+                waiter()
+            }
+
+            document.querySelector(".start").addEventListener("click", transcribe)
 
         </script>
     </head>
@@ -71,10 +86,9 @@
 
         <h1>Transcribe</h1>
 
-        <div class="uploadarea">Drop media file here or click to select</div>
-        <input type="file" id="fileInput">
+        <input type="file" class="file"/>
 
-        <button>Transcribe</button>
+        <button class="start">Transcribe</button>
 
         <h2>Result</h2>
 

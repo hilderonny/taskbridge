@@ -1,6 +1,7 @@
 var PORT = process.env.PORT
 var TASKFILE = process.env.TASKFILE
 var SAVEINTERVAL = process.env.SAVEINTERVAL
+var FILEPATH = process.env.FILEPATH
 
 if (!PORT) {
     console.error("Environment variable PORT was not set")
@@ -17,15 +18,20 @@ if (!SAVEINTERVAL) {
     process.exit(4)
 }
 
+if (!FILEPATH) {
+    console.error("Environment variable FILEPATH was not set")
+    process.exit(4)
+}
+
 var express = require("express")
 var cors = require("cors")
 
 var app = express()
-app.use(express.json({ limit: "50mb"}))
 app.use(cors())
 app.use(express.static("public"))
+//app.use('/api/v1/tasks', require('./api/v1/tasks')) // Hier kommt es zu Konflikten mit tasks.json
+app.use('/api/v2/tasks', require('./api/v2/tasks'))
 app.use('/api/v1/workers', require('./api/v1/workers'))
-app.use('/api/v1/tasks', require('./api/v1/tasks'))
 
 app.listen(PORT, () => {
     console.log(`Task bridge listening on port ${PORT}`)

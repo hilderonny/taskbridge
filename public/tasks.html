@@ -65,7 +65,7 @@
         <script type="module">
 
             var tasktablebody = document.getElementById("tasks")
-            var apiroot = "/api/v1/tasks"
+            var apiroot = "/api/v2/tasks"
 
             async function showTaskDetails(taskid) {
                 var response = await fetch(`${apiroot}/details/${taskid}`)
@@ -78,6 +78,7 @@
                 taskTypeDiv.innerText = task.type
                 var typeColor = `hsl(${calculateHue(task.type)}deg 50% 50%)`
                 taskTypeDiv.style.backgroundColor = typeColor
+                document.querySelector(".detailsoverlay .rightcolumn .file").innerHTML = task.file ? `<a href="${apiroot}/file/${taskid}">${task.file}</a>` : ""
                 document.querySelector(".detailsoverlay .rightcolumn .worker").innerText = task.worker || ""
                 document.querySelector(".detailsoverlay .rightcolumn .status").setAttribute("class", `status ${task.status}`)
                 document.querySelector(".detailsoverlay .rightcolumn .status div").innerText = (task.status === "inprogress" ? "in progress" : task.status)
@@ -231,6 +232,10 @@
                             <tr>
                                 <th>Type</th>
                                 <td class="tasktype"><div></div></td>
+                            </tr>
+                            <tr>
+                                <th>File</th>
+                                <td class="file"></td>
                             </tr>
                             <tr>
                                 <th>Worker</th>
