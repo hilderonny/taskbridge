@@ -17,6 +17,7 @@ The worker implementations define what kind of tasks they can process.
 1. [List all tasks](#list-all-tasks)
 1. [List all workers](#list-all-workers)
 1. [Known workers](#known-workers)
+1. [References](#references)
 
 ## Installation
 
