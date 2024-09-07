@@ -5,15 +5,17 @@ The worker implementations define what kind of tasks they can process.
 1. [Installation](#installation)
 1. [Running](#Running)
 1. [General task format](#general-task-format)
-    1. [Add a task](#add-a-task)
-    1. [Take a task for processing](#take-a-task-for-processing)
-    1. [Report task completion](#report-task-completion)
-    1. [Remove a task](#remove-a-task)
-    1. [Restart a task](#restart-a-task)
-    1. [Get status information about a task](#get-status-information-about-a-task)
-    1. [Get the results of a completed task](#get-the-results-of-a-completed-task)
-    1. [Get all details of a task](#get-all-details-of-a-task)
-    1. [List all tasks](#list-all-tasks)
+1. [Add a task](#add-a-task)
+1. [Take a task for processing](#take-a-task-for-processing)
+1. [Report task completion](#report-task-completion)
+1. [Remove a task](#remove-a-task)
+1. [Restart a task](#restart-a-task)
+1. [Get status information about a task](#get-status-information-about-a-task)
+1. [Get the results of a completed task](#get-the-results-of-a-completed-task)
+1. [Get all details of a task](#get-all-details-of-a-task)
+1. [Download the attached file of a task](#-download-the-attached-file-of-a-task)
+1. [List all tasks](#list-all-tasks)
+1. [List all workers](#list-all-workers)
 1. [Known workers](#known-workers)
 
 ## Installation
@@ -26,13 +28,13 @@ The worker implementations define what kind of tasks they can process.
 On Windows via command line
 
 ```cmd
-set PORT=42000 && set TASKFILE=.\tasks.json && set SAVEINTERVAL=60000 && node server.js
+set PORT=42000 && set TASKFILE=.\tasks.json && set SAVEINTERVAL=60000 FILEPATH=.\upload\ && node server.js
 ```
 
 On Linux via command line
 
 ```cmd
-env PORT=42000 TASKFILE=./tasks.json SAVEINTERVAL=60000 /usr/bin/node server.js
+env PORT=42000 TASKFILE=./tasks.json SAVEINTERVAL=60000 FILEPATH=./upload/ /usr/bin/node server.js
 ```
 
 ## Installing as service on Linux
@@ -54,6 +56,7 @@ SyslogIdentifier=taskbridge
 Environment="PORT=42000"
 Environment="TASKFILE=/github/hilderonny/taskbridge/tasks.json"
 Environment="SAVEINTERVAL=60000"
+Environment="FILEPATH=/github/hilderonny/taskbridge/upload/"
 
 [Install]
 WantedBy=multi-user.target
@@ -72,6 +75,7 @@ sudo systemctl start taskbridge
 task = {
     id: "36b8f84d-df4e-4d49-b662-bcde71a8764f",
     type: "translate",
+    file: "nqzv74n3vq7tnz45378qoztn47583qnbzt45",
     worker: "ROG",
     status: "open",
     createdat: 1717394497292,
@@ -90,6 +94,7 @@ task = {
 |---|---|
 |`id`|Unique identifier (UUID) of the task|
 |`type`|Type of the task. For example `translate`, `transcribe`, `classifyimage`, `describeimage` or something else.|
+|`file`|Name of an optional file within the configured `FILEPATH` attached to the task`|
 |`worker`|Name of the worker which is processing the task|
 |`status`|One of `open`, `inprogress`, `completed`.|
 |`createdat`|Timestamp in milliseconds when the task was created.|
@@ -227,6 +232,7 @@ Response
 {
     "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
     "type": "translate",
+    "file": "nqzv74n3vq7tnz45378qoztn47583qnbzt45",
     "worker": "ROG",
     "status": "open",
     "createdat": 1717394497292,
@@ -238,30 +244,13 @@ Response
 }
 ```
 
-## Get all details of a task
+## Download the attached file of a task
 
 ```
-GET /api/tasks/details/:id
+GET /api/tasks/file/:id
 ```
 
-Response
-
-```json
-{
-    "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-    "type": "translate",
-    "status": "open",
-    "createdat": 1717394497292,
-    "startedat": 1717395321826,
-    "completedat": 1717395345196,
-    "requirements": {
-        "sourcelanguage": "en",
-        "targetlanguage": "de"
-    },
-    "data": { ... },
-    "result": { ... }
-}
-```
+The response is the binary stream of the file if there is one attached to the task with the given `id`.
 
 ## List all tasks
 
