@@ -20,7 +20,7 @@ apiRouter.notifyAboutWorker = function(name, type, status, taskid) {
 }
 
 function cleanupWorkers() {
-    const before10minutes = Date.now() - 1000 * 60 * 10 // Delete worker which is inactive for 10 minutes (working or offline)
+    const before10minutes = Date.now() - 1000 * 60 * 30 // Delete worker which is inactive for 30 minutes (working or offline)
     for (const identifier in workers) {
         const worker = workers[identifier]
         if (worker.lastpingat < before10minutes) {

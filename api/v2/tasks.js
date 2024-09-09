@@ -99,7 +99,7 @@ apiRouter.post('/take/', express.json(), function(req, res) {
 })
 
 // Report task completion
-apiRouter.post('/complete/:id', express.json(), function(req, res) {
+apiRouter.post('/complete/:id', express.json({ limit: "50mb"}), function(req, res) {
     var matchingTask = findTask(req.params.id)
     if (!matchingTask) {
         res.status(404).send()
