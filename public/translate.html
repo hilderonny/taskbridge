@@ -34,7 +34,7 @@
                     var resultresponse = await fetch("/api/v2/tasks/result/" + taskidtowaitfor)
                     var json = await resultresponse.json()
                     var translatedtexts = json.result.texts
-                    targetdiv.innerHTML = translatedtexts.map(el => `<span title="${el.language || ""}">${el.text}</span>`).join("<br/>")
+                    targetdiv.innerHTML = translatedtexts.map(el => `<span title="${el.sourcelanguage || ""}">${el.text}</span>`).join("<br/>")
                     await fetch("/api/v2/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
                     localStorage.removeItem("translate-input")
                     localStorage.removeItem("translate-sourcelanguage")
