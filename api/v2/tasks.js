@@ -10,7 +10,11 @@ var workersApi = require("../v1/workers")
 var multer = require("multer")
 var upload = multer({ dest: FILEPATH })
 
-var tasks = []
+var tasks = {
+    taskcount: {},
+    tasks: []
+}
+
 var isDirty = false // Flag for signalling that the tasks have changed since last file save
 
 var apiRouter = express.Router()
@@ -32,7 +36,7 @@ function saveTasks() {
 
 // Find a task by its id
 function findTask(id) {
-    return tasks.find(function(task) {
+    return tasks.tasks.find(function(task) {
         return task.id === id
     })    
 }
@@ -59,7 +63,7 @@ apiRouter.post("/add/", upload.single('file'), function(req, res) {
     if (json.data) task.data = json.data
     if (json.requirements) task.requirements = json.requirements
     if (req.file) task.file = req.file.filename
-    tasks.push(task)
+    tasks.tasks.push(task)
     isDirty = true
     res.status(200).send({
         id: task.id
@@ -71,7 +75,7 @@ apiRouter.post('/take/', express.json(), function(req, res) {
     var type = req.body.type
     var worker = req.body.worker
     var abilities = req.body.abilities || {}
-    var firstMatchingTask = tasks.find(function(task) {
+    var firstMatchingTask = tasks.tasks.find(function(task) {
         if (task.status !== "open") return false
         if (task.type !== type) return false
         if (task.requirements) {
@@ -107,6 +111,10 @@ apiRouter.post('/complete/:id', express.json({ limit: "50mb"}), function(req, re
         matchingTask.result = req.body.result
         matchingTask.completedat = Date.now()
         matchingTask.status = "completed"
+        if (!tasks.taskcount[matchingTask.type]) {
+            tasks.taskcount[matchingTask.type] = 0
+        }
+        tasks.taskcount[matchingTask.type] += 1
         isDirty = true
         res.status(200).send()
     }
@@ -118,7 +126,7 @@ apiRouter.delete('/remove/:id', function(req, res) {
     if (!matchingTask) {
         res.status(404).send()
     } else {
-        tasks.splice(tasks.indexOf(matchingTask), 1)
+        tasks.tasks.splice(tasks.tasks.indexOf(matchingTask), 1)
         isDirty = true
         if (matchingTask.file) {
             var fullpath = path.join(FILEPATH, matchingTask.file)
@@ -191,7 +199,7 @@ apiRouter.get("/file/:id", function(req, res) {
 
 // List all tasks
 apiRouter.get("/list/", function(_, res) {
-    var filteredtasks = tasks.map(function(task) {
+    var filteredtasks = tasks.tasks.map(function(task) {
         return {
             id: task.id,
             type: task.type,
