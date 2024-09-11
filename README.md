@@ -1,4 +1,5 @@
 # taskbridge
+
 Server for distributing tasks to workers.
 The worker implementations define what kind of tasks they can process.
 
@@ -24,19 +25,20 @@ The worker implementations define what kind of tasks they can process.
 
 1. Download and install NodeJS.
 2. Run `npm ci` in this folder.
+3. Clone https://github.com/hilderonny/taskbridge-webui locally.
 
 ## Running manually
 
 On Windows via command line
 
 ```cmd
-set PORT=42000 && set FILEPATH=.\upload\ && node server.js
+set PORT=42000 && set FILEPATH=.\upload\ && set WEBROOT=..\taskbridge-webui\ && node server.js
 ```
 
 On Linux via command line
 
 ```cmd
-env PORT=42000 FILEPATH=./upload/ /usr/bin/node server.js
+env PORT=42000 FILEPATH=./upload/ WEBROOT=../taskbridge-webui/ /usr/bin/node server.js
 ```
 
 ## Installing as service on Linux
@@ -57,6 +59,7 @@ StandardError=syslog
 SyslogIdentifier=taskbridge
 Environment="PORT=42000"
 Environment="FILEPATH=/github/hilderonny/taskbridge/upload/"
+Environment="WEBROOT=/github/hilderonny/taskbridge-webui/"
 
 [Install]
 WantedBy=multi-user.target
@@ -299,6 +302,7 @@ Response
 
 1. [Text translation](https://github.com/hilderonny/taskworker-translate)
 2. [Audio transcription](https://github.com/hilderonny/taskworker-transcribe)
+3. [Image classification](https://github.com/hilderonny/taskworker-classifyimage)
 
 ## References
 
