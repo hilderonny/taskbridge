@@ -310,3 +310,4 @@ Response
 6. [List icons created by Kiranshastry - Flaticon](https://www.flaticon.com/free-icons/list)
 7. [Translation icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/translation)
 8. [Transcription icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/transcription)
+9. [Image-recognition icons created by SBTS2018 - Flaticon](https://www.flaticon.com/free-icons/image-recognition)
