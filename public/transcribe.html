@@ -24,16 +24,17 @@
             var taskidtowaitfor = undefined
             var intervalid = undefined
             var targetdiv = document.querySelector(".result")
+            var apiroot = "/api/tasks"
 
             async function waiter() {
-                var statusresponse = await fetch("/api/v2/tasks/status/" + taskidtowaitfor)
+                var statusresponse = await fetch(`${apiroot}/status/${taskidtowaitfor}`)
                 var statusresult = await statusresponse.json()
                 if (statusresult.status === "completed") {
-                    var resultresponse = await fetch("/api/v2/tasks/result/" + taskidtowaitfor)
+                    var resultresponse = await fetch(`${apiroot}/result/${taskidtowaitfor}`)
                     var json = await resultresponse.json()
                     var texts = json.result.texts
                     targetdiv.innerHTML = texts.map(text => text.text).join("<br/>")
-                    await fetch("/api/v2/tasks/remove/" + taskidtowaitfor, { method: 'DELETE' })
+                    await fetch(`${apiroot}/remove/${taskidtowaitfor}`, { method: 'DELETE' })
                     localStorage.removeItem("transcribe-taskidtowaitfor")
                     clearInterval(intervalid)
                     intervalid = undefined
@@ -55,7 +56,7 @@
 
                 targetdiv.innerText = `Uploading file ${file.name} ...`
                 
-                var addresponse = await fetch("/api/v2/tasks/add/", {
+                var addresponse = await fetch(`${apiroot}/add/`, {
                     method: "POST",
                     body: formData
                 })

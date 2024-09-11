@@ -1,30 +1,16 @@
-var TASKFILE = process.env.TASKFILE
-var SAVEINTERVAL = process.env.SAVEINTERVAL
+var FILEPATH = process.env.FILEPATH
 
 var fs = require("fs")
+var path = require("path")
 var crypto = require("crypto")
 var express = require("express")
-var workersApi = require("../v1/workers")
+var workersApi = require("./workers")
+var multer = require("multer")
+var upload = multer({ dest: FILEPATH })
 
 var tasks = []
-var isDirty = false // Flag for signalling that the tasks have changed since last file save
 
 var apiRouter = express.Router()
-
-// Load tasks file or create a new one
-fs.readFile(TASKFILE, "utf8", (error, data) => {
-    if (error) {
-        console.error(`Task file "${TASKFILE}" could not be opened for reading. Creating a new one...`)
-        saveTasks()
-    } else {
-        tasks = JSON.parse(data)
-    }
-})
-
-// Save tasks to disk
-function saveTasks() {
-    fs.writeFileSync(TASKFILE, JSON.stringify(tasks, null, 2), "utf8");
-}
 
 // Find a task by its id
 function findTask(id) {
@@ -33,35 +19,28 @@ function findTask(id) {
     })    
 }
 
-// Check once in a minute whether tasks should be written to disk
-setInterval(() => {
-    if (isDirty) {
-        isDirty = false
-        saveTasks()
-    }
-}, SAVEINTERVAL)
-
 /********** APIs **********/
 
 // Add a task
-apiRouter.post("/add/", function(req, res) {
+apiRouter.post("/add/", upload.single('file'), function(req, res) {
+    var json = JSON.parse(req.body.json)
     var task = {
         id: crypto.randomUUID(),
-        type: req.body.type,
-        requirements: req.body.requirements,
+        type: json.type,
         status: "open",
-        createdat: Date.now(),
-        data: req.body.data
+        createdat: Date.now()
     }
+    if (json.data) task.data = json.data
+    if (json.requirements) task.requirements = json.requirements
+    if (req.file) task.file = req.file.filename
     tasks.push(task)
-    isDirty = true
     res.status(200).send({
         id: task.id
     })
 })
 
 // Take a task for processing
-apiRouter.post('/take/', function(req, res) {
+apiRouter.post('/take/', express.json(), function(req, res) {
     var type = req.body.type
     var worker = req.body.worker
     var abilities = req.body.abilities || {}
@@ -84,7 +63,6 @@ apiRouter.post('/take/', function(req, res) {
         firstMatchingTask.status = "inprogress"
         firstMatchingTask.worker = worker
         firstMatchingTask.startedat = Date.now()
-        isDirty = true
         res.status(200).send({
             id: firstMatchingTask.id,
             data: firstMatchingTask.data
@@ -93,7 +71,7 @@ apiRouter.post('/take/', function(req, res) {
 })
 
 // Report task completion
-apiRouter.post('/complete/:id', function(req, res) {
+apiRouter.post('/complete/:id', express.json({ limit: "50mb"}), function(req, res) {
     var matchingTask = findTask(req.params.id)
     if (!matchingTask) {
         res.status(404).send()
@@ -101,7 +79,10 @@ apiRouter.post('/complete/:id', function(req, res) {
         matchingTask.result = req.body.result
         matchingTask.completedat = Date.now()
         matchingTask.status = "completed"
-        isDirty = true
+        if (!tasks.taskcount[matchingTask.type]) {
+            tasks.taskcount[matchingTask.type] = 0
+        }
+        tasks.taskcount[matchingTask.type] += 1
         res.status(200).send()
     }
 })
@@ -113,7 +94,10 @@ apiRouter.delete('/remove/:id', function(req, res) {
         res.status(404).send()
     } else {
         tasks.splice(tasks.indexOf(matchingTask), 1)
-        isDirty = true
+        if (matchingTask.file) {
+            var fullpath = path.join(FILEPATH, matchingTask.file)
+            fs.rmSync(fullpath)
+        }
         res.status(200).send()
     }
 })
@@ -129,7 +113,6 @@ apiRouter.get('/restart/:id', function(req, res) {
         delete matchingTask.worker
         delete matchingTask.startedat
         delete matchingTask.completedat
-        isDirty = true
         res.status(200).send()
     }
 })
@@ -168,12 +151,24 @@ apiRouter.get('/details/:id', function(req, res) {
     }
 })
 
+// Get file attached to a task
+apiRouter.get("/file/:id", function(req, res) {
+    var matchingTask = findTask(req.params.id)
+    if (!matchingTask || !matchingTask.file) {
+        res.status(404).send()
+    } else {
+        var fullpath = path.join(FILEPATH, matchingTask.file)
+        res.status(200).download(fullpath)
+    }
+})
+
 // List all tasks
 apiRouter.get("/list/", function(_, res) {
     var filteredtasks = tasks.map(function(task) {
         return {
             id: task.id,
             type: task.type,
+            file: task.file,
             status: task.status,
             createdat: task.createdat,
             startedat: task.startedat,
@@ -183,6 +178,5 @@ apiRouter.get("/list/", function(_, res) {
     })
     res.status(200).send(filteredtasks)
 })
-
 
 module.exports = apiRouter

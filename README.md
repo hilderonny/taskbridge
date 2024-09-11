@@ -30,13 +30,13 @@ The worker implementations define what kind of tasks they can process.
 On Windows via command line
 
 ```cmd
-set PORT=42000 && set TASKFILE=.\tasks.json && set SAVEINTERVAL=60000 FILEPATH=.\upload\ && node server.js
+set PORT=42000 && set FILEPATH=.\upload\ && node server.js
 ```
 
 On Linux via command line
 
 ```cmd
-env PORT=42000 TASKFILE=./tasks.json SAVEINTERVAL=60000 FILEPATH=./upload/ /usr/bin/node server.js
+env PORT=42000 FILEPATH=./upload/ /usr/bin/node server.js
 ```
 
 ## Installing as service on Linux
@@ -56,8 +56,6 @@ StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=taskbridge
 Environment="PORT=42000"
-Environment="TASKFILE=/github/hilderonny/taskbridge/tasks.json"
-Environment="SAVEINTERVAL=60000"
 Environment="FILEPATH=/github/hilderonny/taskbridge/upload/"
 
 [Install]
@@ -300,6 +298,7 @@ Response
 ## Known workers
 
 1. [Text translation](https://github.com/hilderonny/taskworker-translate)
+2. [Audio transcription](https://github.com/hilderonny/taskworker-transcribe)
 
 ## References
 

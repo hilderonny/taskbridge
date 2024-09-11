@@ -65,7 +65,7 @@
         <script type="module">
 
             var tasktablebody = document.getElementById("tasks")
-            var apiroot = "/api/v2/tasks"
+            var apiroot = "/api/tasks"
 
             async function showTaskDetails(taskid) {
                 var response = await fetch(`${apiroot}/details/${taskid}`)
