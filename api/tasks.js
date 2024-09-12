@@ -120,6 +120,7 @@ apiRouter.get('/restart/:id', function(req, res) {
         delete matchingTask.worker
         delete matchingTask.startedat
         delete matchingTask.completedat
+        delete matchingTask.progress
         res.status(200).send()
     }
 })
