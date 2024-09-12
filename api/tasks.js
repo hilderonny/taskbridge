@@ -70,6 +70,17 @@ apiRouter.post('/take/', express.json(), function(req, res) {
     }
 })
 
+// Report task progress
+apiRouter.post('/progress/:id', express.json({ limit: "50mb"}), function(req, res) {
+    var matchingTask = findTask(req.params.id)
+    if (!matchingTask) {
+        res.status(404).send()
+    } else {
+        matchingTask.progress = parseInt(req.body.progress)
+        res.status(200).send()
+    }
+})
+
 // Report task completion
 apiRouter.post('/complete/:id', express.json({ limit: "50mb"}), function(req, res) {
     var matchingTask = findTask(req.params.id)
@@ -79,10 +90,6 @@ apiRouter.post('/complete/:id', express.json({ limit: "50mb"}), function(req, re
         matchingTask.result = req.body.result
         matchingTask.completedat = Date.now()
         matchingTask.status = "completed"
-        if (!tasks.taskcount[matchingTask.type]) {
-            tasks.taskcount[matchingTask.type] = 0
-        }
-        tasks.taskcount[matchingTask.type] += 1
         res.status(200).send()
     }
 })
@@ -123,9 +130,13 @@ apiRouter.get('/status/:id', function(req, res) {
     if (!matchingTask) {
         res.status(404).send()
     } else {
-        res.status(200).send({
+        result = {
             status: matchingTask.status
-        })
+        }
+        if (matchingTask.progress) {
+            result.progress = matchingTask.progress
+        }
+        res.status(200).send(result)
     }
 })
 
@@ -170,6 +181,7 @@ apiRouter.get("/list/", function(_, res) {
             type: task.type,
             file: task.file,
             status: task.status,
+            progress: task.progress,
             createdat: task.createdat,
             startedat: task.startedat,
             completedat: task.completedat,

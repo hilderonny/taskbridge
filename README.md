@@ -9,6 +9,7 @@ The worker implementations define what kind of tasks they can process.
 1. API
     1. [Add a task](#add-a-task)
     1. [Take a task for processing](#take-a-task-for-processing)
+    1. [Report task progress](#report-task-progress)
     1. [Report task completion](#report-task-completion)
     1. [Remove a task](#remove-a-task)
     1. [Restart a task](#restart-a-task)
@@ -81,6 +82,7 @@ task = {
     file: "nqzv74n3vq7tnz45378qoztn47583qnbzt45",
     worker: "ROG",
     status: "open",
+    progress: 50,
     createdat: 1717394497292,
     startedat: 1717395321826,
     completedat: 1717395345196,
@@ -100,6 +102,7 @@ task = {
 |`file`|Name of an optional file within the configured `FILEPATH` attached to the task`|
 |`worker`|Name of the worker which is processing the task|
 |`status`|One of `open`, `inprogress`, `completed`.|
+|`progress`|Integer between 0 an 100. Only set when status is `inprogress`|
 |`createdat`|Timestamp in milliseconds when the task was created.|
 |`startedat`|Timmestamp when a worker took a task and started working on it. At this time the status switched to `inprogress`.|
 |`completedat`|Timestamp when a worker reported a result for the task. At this time the status switched to `done`.|
@@ -163,6 +166,23 @@ Response on matching task
 
 If no matching task is available, status `404` is returned.
 
+## Report task progress
+
+```
+POST /api/tasks/progress/:id
+```
+
+Request body
+
+```json
+{
+    "progress": "50"
+}
+```
+
+The progress must be a string representing an integer between 0 an 100.
+Response is status `200`.
+
 ## Report task completion
 
 ```
@@ -205,7 +225,8 @@ Response
 
 ```json
 {
-    "status": "inprogress"
+    "status": "inprogress",
+    "progress": 50
 }
 ```
 
@@ -237,7 +258,8 @@ Response
     "type": "translate",
     "file": "nqzv74n3vq7tnz45378qoztn47583qnbzt45",
     "worker": "ROG",
-    "status": "open",
+    "status": "inprogress",
+    "progress": 50,
     "createdat": 1717394497292,
     "startedat": 1717395321826,
     "completedat": 1717395345196,
@@ -268,7 +290,8 @@ Response
     {
         "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
         "type": "translate",
-        "status": "open",
+        "status": "inprogress",
+        "progress": 50,
         "createdat": 1717394497292,
         "startedat": 1717395321826,
         "completedat": 1717395345196
