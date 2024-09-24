@@ -333,14 +333,3 @@ Response
 
 1. [IPED audio translate task](https://github.com/hilderonny/iped-audiotranslatetask)
 1. [NUIX audio translate plugin](https://github.com/hilderonny/nuix-audiotranslateplugin)
-
-## References
-
-1. [Nodes icons created by Kalashnyk - Flaticon](https://www.flaticon.com/free-icons/nodes)
-1. [Download icons created by Debi Alpa Nugraha - Flaticon](https://www.flaticon.com/free-icons/download)
-1. [Refresh icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/refresh)
-1. [Garbage can icons created by pictranoosa - Flaticon](https://www.flaticon.com/free-icons/garbage-can)
-1. [Links icons created by meaicon - Flaticon](https://www.flaticon.com/free-icons/links)
-1. [List icons created by Kiranshastry - Flaticon](https://www.flaticon.com/free-icons/list)
-1. [Translation icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/translation)
-1. [Transcription icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/transcription)
