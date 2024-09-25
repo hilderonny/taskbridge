@@ -21,7 +21,6 @@ The worker implementations define what kind of tasks they can process.
     1. [List all workers](#list-all-workers)
 1. [Known workers](#known-workers)
 1. [Known clients](#known-clients)
-1. [References](#references)
 
 ## Installation
 
@@ -331,5 +330,6 @@ Response
 
 ## Known clients
 
+1. [Taskbridge Web UI](https://github.com/hilderonny/taskbridge-webui)
 1. [IPED audio translate task](https://github.com/hilderonny/iped-audiotranslatetask)
 1. [NUIX audio translate plugin](https://github.com/hilderonny/nuix-audiotranslateplugin)
