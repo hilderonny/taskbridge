@@ -9,6 +9,15 @@ var multer = require("multer")
 var upload = multer({ dest: FILEPATH })
 
 var tasks = []
+var statistics = {}
+
+fs.readFile("./tasks.json", "utf8", (error, data) => {
+    if (!error) {
+        var jsonData = JSON.parse(data)
+        tasks = jsonData.tasks
+        statistics = jsonData.statistics
+    }
+})
 
 var apiRouter = express.Router()
 
@@ -17,6 +26,13 @@ function findTask(id) {
     return tasks.find(function(task) {
         return task.id === id
     })    
+}
+
+function save() {
+    fs.writeFileSync("./tasks.json", JSON.stringify({
+        tasks: tasks,
+        statistics: statistics
+    }), "utf8");
 }
 
 /********** APIs **********/
@@ -34,6 +50,7 @@ apiRouter.post("/add/", upload.single('file'), function(req, res) {
     if (json.requirements) task.requirements = json.requirements
     if (req.file) task.file = req.file.filename
     tasks.push(task)
+    save()
     res.status(200).send({
         id: task.id
     })
@@ -63,6 +80,7 @@ apiRouter.post('/take/', express.json(), function(req, res) {
         firstMatchingTask.status = "inprogress"
         firstMatchingTask.worker = worker
         firstMatchingTask.startedat = Date.now()
+        save()
         res.status(200).send({
             id: firstMatchingTask.id,
             data: firstMatchingTask.data
@@ -90,6 +108,7 @@ apiRouter.post('/complete/:id', express.json({ limit: "50mb"}), function(req, re
         matchingTask.result = req.body.result
         matchingTask.completedat = Date.now()
         matchingTask.status = "completed"
+        save()
         res.status(200).send()
     }
 })
@@ -105,6 +124,7 @@ apiRouter.delete('/remove/:id', function(req, res) {
             var fullpath = path.join(FILEPATH, matchingTask.file)
             fs.rmSync(fullpath)
         }
+        save()
         res.status(200).send()
     }
 })
@@ -121,6 +141,7 @@ apiRouter.get('/restart/:id', function(req, res) {
         delete matchingTask.startedat
         delete matchingTask.completedat
         delete matchingTask.progress
+        save()
         res.status(200).send()
     }
 })
@@ -190,6 +211,10 @@ apiRouter.get("/list/", function(_, res) {
         }
     })
     res.status(200).send(filteredtasks)
+})
+
+apiRouter.get("/statistics/", function(_, res) {
+    res.status(200).send(statistics)
 })
 
 module.exports = apiRouter

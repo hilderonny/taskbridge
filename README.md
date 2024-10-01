@@ -19,6 +19,7 @@ The worker implementations define what kind of tasks they can process.
     1. [Download the attached file of a task](#-download-the-attached-file-of-a-task)
     1. [List all tasks](#list-all-tasks)
     1. [List all workers](#list-all-workers)
+    1. [Get task statistics](#get-task-statistics)
 1. [Known workers](#known-workers)
 1. [References](#references)
 
@@ -319,4 +320,20 @@ Response
     },
     ...
 ]
+```
+
+## Get task statistics
+
+```
+GET /api/tasks/statistics/
+```
+
+Response
+
+```json
+{
+    "transcribe": 1234,
+    "translate": 2345,
+    ...
+}
 ```
