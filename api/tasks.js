@@ -108,6 +108,11 @@ apiRouter.post('/complete/:id', express.json({ limit: "50mb"}), function(req, re
         matchingTask.result = req.body.result
         matchingTask.completedat = Date.now()
         matchingTask.status = "completed"
+        if (statistics[matchingTask.type]) {
+            statistics[matchingTask.type] += 1
+        } else {
+            statistics[matchingTask.type] = 1
+        }
         save()
         res.status(200).send()
     }
