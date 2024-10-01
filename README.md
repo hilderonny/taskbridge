@@ -4,7 +4,7 @@ Server for distributing tasks to workers.
 The worker implementations define what kind of tasks they can process.
 
 1. [Installation](#installation)
-1. [Running](#Running)
+1. [Running](#running-manually)
 1. [General task format](#general-task-format)
 1. API
     1. [Add a task](#add-a-task)
@@ -16,12 +16,12 @@ The worker implementations define what kind of tasks they can process.
     1. [Get status information about a task](#get-status-information-about-a-task)
     1. [Get the results of a completed task](#get-the-results-of-a-completed-task)
     1. [Get all details of a task](#get-all-details-of-a-task)
-    1. [Download the attached file of a task](#-download-the-attached-file-of-a-task)
+    1. [Download the attached file of a task](#download-the-attached-file-of-a-task)
     1. [List all tasks](#list-all-tasks)
     1. [List all workers](#list-all-workers)
     1. [Get task statistics](#get-task-statistics)
 1. [Known workers](#known-workers)
-1. [References](#references)
+1. [Known clients](#known-clients)
 
 ## Installation
 
@@ -337,3 +337,16 @@ Response
     ...
 }
 ```
+
+## Known workers
+
+1. [Text translation](https://github.com/hilderonny/taskworker-translate)
+1. [Audio transcription](https://github.com/hilderonny/taskworker-transcribe)
+1. [Image classification](https://github.com/hilderonny/taskworker-classifyimage)
+1. [Virus scanning](https://github.com/hilderonny/taskworker-scanforvirus)
+
+## Known clients
+
+1. [Taskbridge Web UI](https://github.com/hilderonny/taskbridge-webui)
+1. [IPED audio translate task](https://github.com/hilderonny/iped-audiotranslatetask)
+1. [NUIX audio translate plugin](https://github.com/hilderonny/nuix-audiotranslateplugin)
