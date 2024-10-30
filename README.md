@@ -34,13 +34,21 @@ The worker implementations define what kind of tasks they can process.
 On Windows via command line
 
 ```cmd
-set PORT=42000 && set FILEPATH=.\upload\ && set WEBROOT=..\taskbridge-webui\ && node server.js
+REM With Web UI
+cmd /c "set PORT=42000 && set FILEPATH=.\upload\ && set WEBROOT=..\taskbridge-webui\ && node server.js"
+
+REM Without Web UI
+cmd /c "set PORT=42000 && set FILEPATH=.\upload\ && node server.js"
 ```
 
 On Linux via command line
 
-```cmd
+```sh
+# With Web UI
 env PORT=42000 FILEPATH=./upload/ WEBROOT=../taskbridge-webui/ /usr/bin/node server.js
+
+# Without web UI
+env PORT=42000 FILEPATH=./upload/ /usr/bin/node server.js
 ```
 
 ## Installing as service on Linux
