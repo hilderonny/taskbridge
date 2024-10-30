@@ -61,9 +61,7 @@ apiRouter.post('/take/', express.json(), function(req, res) {
     var type = req.body.type
     var worker = req.body.worker
     var firstMatchingTask = tasks.find(function(task) {
-        if (task.status !== "open") return false
-        if (task.type !== type) return false
-        return true
+        return (task.type === type) && (task.status === "open")
     })
     workersApi.notifyAboutWorker(worker, type, firstMatchingTask ? "working" : "idle", firstMatchingTask ? firstMatchingTask.id : undefined)
     if (!firstMatchingTask) {
