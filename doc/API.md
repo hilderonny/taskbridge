@@ -4,3 +4,4 @@ The communication with the **TaskBridge** is done over a REST API at the sub-url
 This API uses JSON and FormData as content types, depending on the specific API.
 
 The API is documented with OpenAPI and can be accessed after running the server at the server URL `http://mytaskbridge.server:42000/apidoc/`.
+An example documentation can be found at https://taskbridge.glitch.me/apidoc/
