@@ -32,6 +32,11 @@ if (WEBROOT) {
 app.use('/api/tasks', require('./api/tasks'))
 app.use('/api/workers', require('./api/workers'))
 
+// API documentation with OpenAPI, see https://medium.com/wolox/documenting-a-nodejs-rest-api-with-openapi-3-swagger-5deee9f50420
+var swaggerUi = require("swagger-ui-express");
+var swaggerDocs = require("./openApiDocumentation")
+app.use("/apidoc", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 app.listen(PORT, () => {
     console.info("INFO: taskbridge started")
 })
