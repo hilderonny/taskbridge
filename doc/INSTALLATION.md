@@ -1,51 +1,18 @@
 # Installation
 
-TODO:
-  - Download von Releases (https://github.com/hilderonny/taskbridge/issues/5)
-  - Vorbedingung NodeJS (welche Version?)
-  - Auf separatem Linux Server
-  - Auf separatem Windows Server
-  - Standalone unter Windows
-  - Weboberfläche (aus anderem Repository ziehen) (optional siehe https://github.com/hilderonny/taskbridge/issues/2)
+Depending on where and how you want to run TaskBridge you have several options. For all of them you need following prerequisites:
 
+- Install [NodeJS](https://nodejs.org/)
+- Download and extract tha latest release of the TaskBridge
+- Run `npm ci` in the extracted folder
 
-## General preparation
+If you want to have an optional web user interface, download a release of the WebUI from https://github.com/hilderonny/taskbridge-webui/ and extract it to a folder of your choice.
 
-## As service on a Linux server
+## Running as a background service on a Linux server
 
-## As service on a Windows server
+Create a file `/etc/systemd/system/taskbridge.service` with the following content. Adopt the folders where you downloaded the TaskBridge.
 
-## For manual start on a standalone Windows machine
-
-## (Optional) Install web user interface
-
-
-
-
-
-Old:
-
-1. Download and install NodeJS - https://nodejs.org/en/download/.
-2. Run `npm ci` in this folder.
-3. Clone https://github.com/hilderonny/taskbridge-webui locally.
-
-## Running manually
-
-On Windows via command line
-
-```cmd
-set PORT=42000 && set FILEPATH=.\upload\ && set WEBROOT=..\taskbridge-webui\ && node server.js
-```
-
-On Linux via command line
-
-```cmd
-env PORT=42000 FILEPATH=./upload/ WEBROOT=../taskbridge-webui/ /usr/bin/node server.js
-```
-
-## Installing as service on Linux
-
-Create a file `/etc/systemd/system/taskbridge.service` with the following content.
+The `WEBROOT` variable should point to the WebUI directory. If you do not need the Web UI you can remove the line from the configuration file.
 
 ```
 [Unit]
@@ -67,9 +34,33 @@ Environment="WEBROOT=/github/hilderonny/taskbridge-webui/"
 WantedBy=multi-user.target
 ```
 
-Now run those cammands to enable and start the service.
+Now run those commands to enable and start the service.
 
 ```sh
 sudo systemctl enable taskbridge
 sudo systemctl start taskbridge
+```
+
+## Manual start on Linux
+
+Open a shell and run the following command.
+
+```sh
+# With WebUI
+env PORT=42000 FILEPATH=/github/hilderonny/taskbridge/upload/ WEBROOT=/github/hilderonny/taskbridge-webui/ /usr/bin/node /github/hilderonny/taskbridge/server.js
+
+# Without WebUI
+env PORT=42000 FILEPATH=/github/hilderonny/taskbridge/upload/ /usr/bin/node /github/hilderonny/taskbridge/server.js
+```
+
+## Manual start on Windows
+
+Open a command line (not Powershell) an run the following command.
+
+```cmd
+REM With Web UI
+cmd /c "set PORT=42000 && set FILEPATH=\github\hilderonny\taskbridge\upload\ && set WEBROOT=\github\hilderonny\taskbridge-webui\ && node \github\hilderonny\taskbridge\server.js"
+
+REM Without Web UI
+cmd /c "set PORT=42000 && set FILEPATH=\github\hilderonny\taskbridge\upload\ && node \github\hilderonny\taskbridge\server.js"
 ```
