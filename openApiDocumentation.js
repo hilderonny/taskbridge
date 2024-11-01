@@ -383,6 +383,34 @@ module.exports = {
                     }
                 }
             }
+        },
+        "/api/workers/list/": {
+            get: {
+                tags: [ "Workers" ],
+                description: "List all currently connected workers",
+                responses: {
+                    "200": {
+                        description: "List of connected workers. Can be an empty list.",
+                        content: {
+                            "application/json": {
+                                schema: {
+                                    type: "array",
+                                    items: {
+                                        type: "object",
+                                        properties: {
+                                            name: { $ref: "#/components/schemas/taskWorker" },
+                                            type: { $ref: "#/components/schemas/taskType" },
+                                            status: { $ref: "#/components/schemas/workerStatus" },
+                                            lastping: { $ref: "#/components/schemas/workerLastPing" },
+                                            taskid: { $ref: "#/components/schemas/taskId" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     components: {
@@ -470,6 +498,17 @@ module.exports = {
                 type: "string",
                 description: "Name of the worker which is processing the task",
                 example: "SENECA-GPU0"
+            },
+            workerStatus: {
+                type: "string",
+                enum: [ "working", "idle" ],
+                description: "Status of the worker",
+                example: "idle"
+            },
+            workerLastPing: {
+                type: "integer",
+                description: "Timestamp when a worker communicated with the TaskBridge last time",
+                example: 1717395321826
             }
         }
     }
