@@ -1,14 +1,31 @@
 # Development
 
-TODO:
-  - Einrichtung Entwicklungsumgebung
-  - Klonen
-  - `npm ci`
-  - Handhabung Versionsdefinition
-  - Handhabung Releases
-  - Mitarbeit
-    - Issues erstellen
-    - Selbstgebaute Worker oder Clients in Liste aufnehmen
-    - Aufbau Commit Messages (`#X - ...` / `closes #X, closes #Y - ...`)
-    - APIDOC generieren (openApiDocumentation.js auf glitch/taskbridge kopieren)
-    - Refresh glitch mit `git pull https://github.com/hilderonny/taskbridge "1.1.0"` und  `refresh`, vorher bei GitHub abmelden
+## Setup development environment
+
+- Download and install [NodeJS](https://nodejs.org/)
+- Download and install [Visual Studio Code](https://code.visualstudio.com/)
+- Download and install [Git](https://git-scm.com/)
+- Clone repository with `git clone https://github.com/hilderonny/taskbridge`
+- Install dependencies with `npm ci` within the repository folder
+
+## Report issues
+
+Feel free to report any issues to this project. Every issue will be read and at least commented!
+
+## Developing custom workers and task types
+
+If you want to develop an own worker, you can do it in your own repository and create an issue for listing it in this documentation.
+
+Make sure to define a task type which is not already in use and inform me about it as soon as possible, so that I can reserve it for you.
+
+## Deploying releases
+
+A new release is created directly from the main branch and directly on GitHub.
+
+- Switch to the main branch locally an make a `git pull`
+- Compress all files and folders except `node_modules` and `upload` into a ZIP-File
+- Name the ZIP-File `taskbridge-<VERSIONNUMBER>.zip`
+- Create a release on GitHub and attach the ZIP-File
+- Note all changes since the previous release in the release notes
+- Publish the release
+- Refresh the Glitch-Project at https://glitch.com/~taskbridge to have the API documentation up to date by opening the terminal in Glitch and calling `git pull https://github.com/hilderonny/taskbridge "main"` followed by `refresh`
