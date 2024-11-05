@@ -22,9 +22,10 @@ Make sure to define a task type which is not already in use and inform me about 
 
 A new release is created directly from the main branch and directly on GitHub.
 
-- Switch to the main branch locally an make a `git pull`
+- Switch to the main branch locally and make a `git pull`
+- Change the version number in the file `package.json`
 - Compress all files and folders except `node_modules` and `upload` into a ZIP-File
-- Name the ZIP-File `taskbridge-<VERSIONNUMBER>.zip`
+- Name the ZIP-File `taskbridge-<MAJOR>.<MINOR>.<BUGFIX>.zip`
 - Create a release on GitHub and attach the ZIP-File
 - Note all changes since the previous release in the release notes
 - Publish the release

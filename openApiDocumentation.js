@@ -4,6 +4,25 @@
 module.exports = {
     openapi: "3.0.1",
     paths: {
+        "/api/version/": {
+            get: {
+                tags: [ "System" ],
+                description: "Obtain the version of the TaskBridge",
+                responses: {
+                    "200": {
+                        description: "Version in the format MAJOR.MINOR.BUGFIX",
+                        content: {
+                            "text/plain": {
+                                schema: {
+                                    type: "string",
+                                    example: "1.1.0"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/tasks/list/": {
             get: {
                 tags: [ "Tasks" ],
