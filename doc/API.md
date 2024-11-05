@@ -3,39 +3,8 @@
 The communication with the **TaskBridge** is done over a REST API at the sub-url `/api/`, e.g. `http://mytaskbridge.server:42000/api/`.
 This API uses JSON and FormData as content types, depending on the specific API.
 
-**Administration**
-
-1. [List all tasks](#list-all-tasks)
-
-GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG Oben alle Unterabschnitte in relevanter Reihenfolge auflisten, die schon bearbeitet wurden
-
-**Administration**
-
-1. [Get task statistics](#get-task-statistics)
-1. [Restart a task](#restart-a-task)
-1. [Get all details of a task](#get-all-details-of-a-task)
-1. [List all workers](#list-all-workers)
-
-**Client point of view**
-
-1. [Add a task](#add-a-task)
-1. [Get status information about a task](#get-status-information-about-a-task)
-1. [Get the results of a completed task](#get-the-results-of-a-completed-task)
-1. [Remove a task](#remove-a-task)
-
-**Worker point of view**
-
-1. [Take a task for processing](#take-a-task-for-processing)
-1. [Download the attached file of a task](#download-the-attached-file-of-a-task)
-1. [Report task progress](#report-task-progress)
-1. [Report task completion](#report-task-completion)
-
-
-TODO:
-  - tasks
-  - workers
-  - Allgemeiner Aufbau der Anfragen
-  - APIDOC verweisen (siehe https://github.com/hilderonny/taskbridge/issues/3)
+The API is documented with OpenAPI and can be accessed after running the server at the server URL `http://mytaskbridge.server:42000/apidoc/`.
+An example documentation can be found at https://taskbridge.glitch.me/apidoc/
 
 ## List all tasks
 
@@ -63,54 +32,6 @@ GET /api/tasks/list/
     ...
 ]
 ```
-
-
-
-
-
-
-
-
-
-
-GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-
-
-
-
-
-
-## General task format
-
-```js
-task = {
-    id: "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-    type: "translate",
-    file: "nqzv74n3vq7tnz45378qoztn47583qnbzt45",
-    worker: "ROG",
-    status: "open",
-    progress: 50,
-    createdat: 1717394497292,
-    startedat: 1717395321826,
-    completedat: 1717395345196,
-    data: { ... },
-    result: { ... }
-}
-```
-
-|Property|Description|
-|---|---|
-|`id`|Unique identifier (UUID) of the task|
-|`type`|Type of the task. For example `translate`, `transcribe`, `classifyimage`, `scanforvirus` or something else.|
-|`file`|Name of an optional file within the configured `FILEPATH` attached to the task`|
-|`worker`|Name of the worker which is processing the task|
-|`status`|One of `open`, `inprogress`, `completed`.|
-|`progress`|Integer between 0 an 100. Only set when status is `inprogress`|
-|`createdat`|Timestamp in milliseconds when the task was created.|
-|`startedat`|Timmestamp when a worker took a task and started working on it. At this time the status switched to `inprogress`.|
-|`completedat`|Timestamp when a worker reported a result for the task. At this time the status switched to `done`.|
-|`data`|Data to be processed by the worker. Depends on the task type and on the requirements of the specific task.|
-|`result`|Result the worker reported after completing the task. Also depends on the task type.|
 
 ## Add a task
 
@@ -275,27 +196,20 @@ GET /api/tasks/file/:id
 
 The response is the binary stream of the file if there is one attached to the task with the given `id`.
 
-## List all tasks
+## Get task statistics
 
 ```
-GET /api/tasks/list/
+GET /api/tasks/statistics/
 ```
 
 Response
 
 ```json
-[
-    {
-        "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-        "type": "translate",
-        "status": "inprogress",
-        "progress": 50,
-        "createdat": 1717394497292,
-        "startedat": 1717395321826,
-        "completedat": 1717395345196
-    },
+{
+    "transcribe": 1234,
+    "translate": 2345,
     ...
-]
+}
 ```
 
 ## List all workers
@@ -319,18 +233,34 @@ Response
 ]
 ```
 
-## Get task statistics
+## General task format
 
-```
-GET /api/tasks/statistics/
-```
-
-Response
-
-```json
-{
-    "transcribe": 1234,
-    "translate": 2345,
-    ...
+```js
+task = {
+    id: "36b8f84d-df4e-4d49-b662-bcde71a8764f",
+    type: "translate",
+    file: "nqzv74n3vq7tnz45378qoztn47583qnbzt45",
+    worker: "ROG",
+    status: "open",
+    progress: 50,
+    createdat: 1717394497292,
+    startedat: 1717395321826,
+    completedat: 1717395345196,
+    data: { ... },
+    result: { ... }
 }
 ```
+
+|Property|Description|
+|---|---|
+|`id`|Unique identifier (UUID) of the task|
+|`type`|Type of the task. For example `translate`, `transcribe`, `classifyimage`, `scanforvirus` or something else.|
+|`file`|Name of an optional file within the configured `FILEPATH` attached to the task`|
+|`worker`|Name of the worker which is processing the task|
+|`status`|One of `open`, `inprogress`, `completed`.|
+|`progress`|Integer between 0 an 100. Only set when status is `inprogress`|
+|`createdat`|Timestamp in milliseconds when the task was created.|
+|`startedat`|Timmestamp when a worker took a task and started working on it. At this time the status switched to `inprogress`.|
+|`completedat`|Timestamp when a worker reported a result for the task. At this time the status switched to `done`.|
+|`data`|Data to be processed by the worker. Depends on the task type and on the requirements of the specific task.|
+|`result`|Result the worker reported after completing the task. Also depends on the task type.|
