@@ -31,7 +31,7 @@ app.use(cors())
 
 if (WEBROOT) {
     console.info(`INFO: Using WEBROOT ${WEBROOT}`)
-    app.use(express.static(WEBROOT))
+    app.use(express.static(WEBROOT.trim())) // Remove trailing spaces
 } else {
     console.warn("WARNING: Environment variable WEBROOT was not set, starting without Web UI")
 }
