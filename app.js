@@ -10,7 +10,7 @@ function createApp(filepath, webroot) {
         app.use(express.static(webroot.trim())) // Remove trailing spaces
     }
     
-    app.use('/api/tasks', require('./api/tasks'))
+    app.use('/api/tasks', require('./api/tasks')(filepath))
     app.use('/api/workers', require('./api/workers'))
     app.use('/api/version', require('./api/version'))
     
