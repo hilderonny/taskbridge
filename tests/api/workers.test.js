@@ -6,6 +6,11 @@ const OLDWORKERTIME = new Date('2024-11-07T01:30:00.000Z').valueOf()
 const WORKERTIME = new Date('2024-11-07T02:00:00.000Z').valueOf()
 const FETCHTIME = new Date('2024-11-07T02:02:00.000Z').valueOf()
 
+afterEach(() => {
+  // Clear all mocks
+  jest.restoreAllMocks()
+})
+
 describe("GET /api/workers/list/", () => {
 
   it("should return empty list if no worker is present", async() => {

@@ -4,24 +4,33 @@ const request = require("supertest")
 const crypto = require("crypto")
 
 const createApp = require("../../../app.js")
-const tasksjsonpath = "./tasks.json"
 const uploadpath = "./testupload"
-let app
+const tasksjsonpath = "./tasks.json"
+let app, filemocks
 
 beforeEach(() => {
-  // Delete tasks.json file
-  if (fs.existsSync(tasksjsonpath)) {
-    fs.unlinkSync(tasksjsonpath)
-  }
+  // Mock file reading
+  filemocks = {}
+  // Provide package.json content for version reading and so, it is accessed by absolute path
+  const packagejsonpath = path.join(__dirname, "../../../package.json")
+  filemocks[packagejsonpath] = fs.readFileSync(packagejsonpath)
+  jest.spyOn(fs, "existsSync").mockImplementation((filepath) => !!filemocks[filepath])
+  jest.spyOn(fs, "readFileSync").mockImplementation((filepath) => filemocks[filepath])
+  jest.spyOn(fs, "writeFileSync").mockImplementation((filepath, content) => { filemocks[filepath] = content })
   // Create app
   app = createApp(uploadpath, "./testwebroot")
 })
 
 afterEach(() => {
-  // Clean upload directory
+  // Clear all mocks
+  jest.restoreAllMocks()
+})
+
+afterAll(() => {
+  // Clean upload directory AFTER! all parallel tests
   for (const file of fs.readdirSync(uploadpath)) {
-    fs.unlinkSync(path.join(uploadpath, file));
-  }  
+    fs.unlinkSync(path.join(uploadpath, file))
+  }
 })
 
 function readtasksjson() {
@@ -70,6 +79,8 @@ describe("POST /api/tasks/add/", () => {
     expect(firsttask).toHaveProperty("file")
     const filename = firsttask.file
     const filepath = path.join(uploadpath, filename)
+    // Clear file mocks before reading real file
+    jest.restoreAllMocks()
     expect(fs.existsSync(filepath)).toEqual(true)
     const filecontentbuffer = fs.readFileSync(filepath)
     expect(filecontentbuffer).toEqual(testfilebuffer)

@@ -12,13 +12,14 @@ function createRouter(filepath) {
     var tasks = []
     var statistics = {}
 
-    fs.readFile("./tasks.json", "utf8", (error, data) => {
-        if (!error) {
-            var jsonData = JSON.parse(data)
-            tasks = jsonData.tasks
-            statistics = jsonData.statistics
-        }
-    })
+    const tasksjsonpath = "./tasks.json"
+
+    if (fs.existsSync(tasksjsonpath)) {
+        const filecontent = fs.readFileSync(tasksjsonpath, "utf8")
+        var jsonData = JSON.parse(filecontent)
+        tasks = jsonData.tasks
+        statistics = jsonData.statistics
+    }
 
     var apiRouter = express.Router()
 
@@ -30,10 +31,11 @@ function createRouter(filepath) {
     }
 
     function save() {
-        fs.writeFileSync("./tasks.json", JSON.stringify({
+        const content = JSON.stringify({
             tasks: tasks,
             statistics: statistics
-        }), "utf8")
+        })
+        fs.writeFileSync(tasksjsonpath, content, "utf8")
     }
 
     /********** APIs **********/
