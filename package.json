@@ -12,9 +12,22 @@
     "version": "1.0.0"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "cross-env NODE_ENV=test jest"
   },
-  "engines" : { 
-    "node" : ">=16.0.0"
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "collectCoverage": true
   }
 }
