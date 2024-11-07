@@ -233,6 +233,22 @@ Response
 ]
 ```
 
+## Get version of TaskBridge
+
+Use this API if you need to fetch the version number of the running TaskBridge instance. The response is in plain text.
+
+**Request**
+
+```
+GET /api/version/
+```
+
+**Response**
+
+```
+1.1.0
+```
+
 ## General task format
 
 ```js
