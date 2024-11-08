@@ -1,347 +1,58 @@
-# taskbridge
-
-Server for distributing tasks to workers.
-The worker implementations define what kind of tasks they can process.
-
-1. [Installation](#installation)
-1. [Running](#running-manually)
-1. [General task format](#general-task-format)
-1. API
-    1. [Add a task](#add-a-task)
-    1. [Take a task for processing](#take-a-task-for-processing)
-    1. [Report task progress](#report-task-progress)
-    1. [Report task completion](#report-task-completion)
-    1. [Remove a task](#remove-a-task)
-    1. [Restart a task](#restart-a-task)
-    1. [Get status information about a task](#get-status-information-about-a-task)
-    1. [Get the results of a completed task](#get-the-results-of-a-completed-task)
-    1. [Get all details of a task](#get-all-details-of-a-task)
-    1. [Download the attached file of a task](#download-the-attached-file-of-a-task)
-    1. [List all tasks](#list-all-tasks)
-    1. [List all workers](#list-all-workers)
-    1. [Get task statistics](#get-task-statistics)
-1. [Known workers](#known-workers)
-1. [Known clients](#known-clients)
-
-## Installation
-
-1. Download and install NodeJS.
-2. Run `npm ci` in this folder.
-3. Clone https://github.com/hilderonny/taskbridge-webui locally.
-
-## Running manually
-
-On Windows via command line
-
-```cmd
-set PORT=42000 && set FILEPATH=.\upload\ && set WEBROOT=..\taskbridge-webui\ && node server.js
-```
-
-On Linux via command line
-
-```cmd
-env PORT=42000 FILEPATH=./upload/ WEBROOT=../taskbridge-webui/ /usr/bin/node server.js
-```
-
-## Installing as service on Linux
-
-Create a file `/etc/systemd/system/taskbridge.service` with the following content.
-
-```
-[Unit]
-Description=taskbridge
-
-[Service]
-ExecStart=/usr/bin/node /github/hilderonny/taskbridge/server.js
-WorkingDirectory=/github/hilderonny/taskbridge
-Restart=always
-RestartSec=10
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=taskbridge
-Environment="PORT=42000"
-Environment="FILEPATH=/github/hilderonny/taskbridge/upload/"
-Environment="WEBROOT=/github/hilderonny/taskbridge-webui/"
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Now run those cammands to enable and start the service.
-
-```sh
-sudo systemctl enable taskbridge
-sudo systemctl start taskbridge
-```
-
-## General task format
-
-```js
-task = {
-    id: "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-    type: "translate",
-    file: "nqzv74n3vq7tnz45378qoztn47583qnbzt45",
-    worker: "ROG",
-    status: "open",
-    progress: 50,
-    createdat: 1717394497292,
-    startedat: 1717395321826,
-    completedat: 1717395345196,
-    requirements: {
-        sourcelanguage: "en",
-        targetlanguage: "de"
-    },
-    data: { ... },
-    result: { ... }
-}
-```
-
-|Property|Description|
-|---|---|
-|`id`|Unique identifier (UUID) of the task|
-|`type`|Type of the task. For example `translate`, `transcribe`, `classifyimage`, `describeimage` or something else.|
-|`file`|Name of an optional file within the configured `FILEPATH` attached to the task`|
-|`worker`|Name of the worker which is processing the task|
-|`status`|One of `open`, `inprogress`, `completed`.|
-|`progress`|Integer between 0 an 100. Only set when status is `inprogress`|
-|`createdat`|Timestamp in milliseconds when the task was created.|
-|`startedat`|Timmestamp when a worker took a task and started working on it. At this time the status switched to `inprogress`.|
-|`completedat`|Timestamp when a worker reported a result for the task. At this time the status switched to `done`.|
-|`requirements`|Requirements a worker must meet in its `abilities`. Each requirement must match exactly to the worker ability.|
-|`data`|Data to be processed by the worker. Depends on the task type and on the requirements of the specific task.|
-|`result`|Result the worker reported after completing the task. Also depends on the task type.|
+# TaskBridge
 
-## Add a task
-
-```
-POST /api/tasks/add/
-```
+**TaskBridge** is a NodeJS application for distributed computing. There is one server as central communication endpoint which handles the distribution of tasks. **Clients** can set tasks for processing which the server stores in a holding pattern until the get fetched and processed by **workers**.
 
-Request body
+![Network structure](doc/images/network-structure.png)
 
-```json
-{
-    "type": "translate",
-    "requirements": {
-        "sourcelanguage": "en",
-        "targetlanguage": "de"
-    },
-    "data": "Hello World"
-}
-```
+After a worker processed a task, it reports the results back to the **TaskBridge** and the original client can fetch the results afterwards.
 
-Response
+The data of the tasks are only stored as long as they are in progress. After completion they get deleted from the server and from the processing worker.
 
-```json
-{
-    "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f"
-}
-```
+The installation can be done in a secured environment without internet connection, can be scaled without (known) limits and has no hidden costs.
 
-## Take a task for processing
+Below you can find documentation about the installation and usage of the **TaskBridge**.
 
-```
-POST /api/tasks/take/
-```
+- [Installation and running](doc/INSTALLATION.md)
+- [API](doc/API.md)
+- [Tasks](doc/TASKS.md)
+- [Development](doc/DEVELOPMENT.md)
 
-Request body
+For a graphical user interface there is a [Web UI extension](https://github.com/hilderonny/taskbridge-webui) which you can install into the **TaskBridge**. It provides an overview of the status of the system and its currently running tasks.
 
-```json
-{
-    "type": "translate",
-    "abilities": {
-        "sourcelanguage": "en",
-        "targetlanguage": "de"
-    }
-}
-```
+![Web UI - Tasks](doc/images/webui-tasks.png)
 
-Response on matching task
+In the Web UI you can also interact with the system and set tasks for a fast processing. For example you can upload a media file and let it be transcribed so that you will get the text within the fil in the original language.
 
-```json
-{
-    "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-    "data": "Hello World"
-}
-```
-
-If no matching task is available, status `404` is returned.
-
-## Report task progress
-
-```
-POST /api/tasks/progress/:id
-```
-
-Request body
-
-```json
-{
-    "progress": "50"
-}
-```
+![Web UI - Transcribe](doc/images/webui-transcribe.png)
 
-The progress must be a string representing an integer between 0 an 100.
-Response is status `200`.
-
-## Report task completion
+In another section of the Web UI you can input text of anly language and let the workers translate it into another language of your choice.
 
-```
-POST /api/tasks/complete/:id
-```
+![Web UI - Translate](doc/images/webui-translate.png)
 
-Request body
-
-```json
-{
-    "result": "Hallo Welt"
-}
-```
-
-Response is status `200`.
-
-## Remove a task
-
-```
-DELETE /api/tasks/remove/:id
-```
-
-Response is status `200`.
-
-## Restart a task
-
-```
-GET /api/tasks/restart/:id
-```
-
-Response is status `200`.
-
-## Get status information about a task
-
-```
-GET /api/tasks/status/:id
-```
-
-Response
-
-```json
-{
-    "status": "inprogress",
-    "progress": 50
-}
-```
-
-## Get the results of a completed task
-
-```
-GET /api/tasks/result/:id
-```
-
-Response
-
-```json
-{
-    "result": "Hallo Welt"
-}
-```
-
-## Get all details of a task
-
-```
-GET /api/tasks/details/:id
-```
-
-Response
-
-```json
-{
-    "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-    "type": "translate",
-    "file": "nqzv74n3vq7tnz45378qoztn47583qnbzt45",
-    "worker": "ROG",
-    "status": "inprogress",
-    "progress": 50,
-    "createdat": 1717394497292,
-    "startedat": 1717395321826,
-    "completedat": 1717395345196,
-    "requirements": { ... },
-    "data": { ... },
-    "result": { ... }
-}
-```
-
-## Download the attached file of a task
-
-```
-GET /api/tasks/file/:id
-```
-
-The response is the binary stream of the file if there is one attached to the task with the given `id`.
-
-## List all tasks
-
-```
-GET /api/tasks/list/
-```
-
-Response
-
-```json
-[
-    {
-        "id": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-        "type": "translate",
-        "status": "inprogress",
-        "progress": 50,
-        "createdat": 1717394497292,
-        "startedat": 1717395321826,
-        "completedat": 1717395345196
-    },
-    ...
-]
-```
-
-## List all workers
-
-```
-GET /api/workers/list/
-```
-
-Response
-
-```json
-[
-    {
-        "name": "RH-WORKBOOK",
-        "type": "translate",
-        "status": "idle",
-        "taskid": "36b8f84d-df4e-4d49-b662-bcde71a8764f",
-        "lastping": 292
-    },
-    ...
-]
-```
-
-## Get task statistics
-
-```
-GET /api/tasks/statistics/
-```
-
-Response
-
-```json
-{
-    "transcribe": 1234,
-    "translate": 2345,
-    ...
-}
-```
+If you have an image and want it to be classified by a single word, you can upload it in the Web UI and you will get a list of possible classes representing the image. The classes are based on the [Synsets retained from ILSVRC2011](https://image-net.org/challenges/LSVRC/2012/browse-synsets)
+
+![Web UI - Classify image](doc/images/webui-classifyimage.png)
+
+If you have a suspicious file and want to know whether it is save to open it, you can upload the file in the Web UI and a worker will sacn it for malware and virusses. As result you get a "No virus found" message or the name of the detected malware is shown to you. [ClamAV](https://www.clamav.net/) is working behind the scenes here.
+
+![Web UI - Scan for virus](doc/images/webui-scanforvirus.png)
+
+In the **Workers** tab you get an overview of all workers currently connected to the **TaskBridge** including their current status and abilities.
+
+![Web UI - Workers](doc/images/webui-workers.png)
+
+Currently there are several **Clients** implementations working with the **TaskBridge**. There is a Python Task for [IPED](https://github.com/sepinf-inc/IPED) ...
+
+![IPED Task](doc/images/iped-task.png)
+
+... and a Ruby plugin for [NUIX](https://www.nuix.com/)
+
+![NUIX plugin](doc/images/nuix-plugin.png)
 
 ## Known workers
 
-1. [Text translation](https://github.com/hilderonny/taskworker-translate)
 1. [Audio transcription](https://github.com/hilderonny/taskworker-transcribe)
+1. [Text translation](https://github.com/hilderonny/taskworker-translate)
 1. [Image classification](https://github.com/hilderonny/taskworker-classifyimage)
 1. [Virus scanning](https://github.com/hilderonny/taskworker-scanforvirus)
 
@@ -350,3 +61,4 @@ Response
 1. [Taskbridge Web UI](https://github.com/hilderonny/taskbridge-webui)
 1. [IPED audio translate task](https://github.com/hilderonny/iped-audiotranslatetask)
 1. [NUIX audio translate plugin](https://github.com/hilderonny/nuix-audiotranslateplugin)
+1. X-Ways audio translate extension (Coming soon ...)
