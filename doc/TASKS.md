@@ -6,6 +6,7 @@ Here you can find information about the known task types and their data structur
 1. [Task type "translate"](#task-type-translate)
 1. [Task type "classifyimage"](#task-type-classifyimage)
 1. [Task type "scanforvirus"](#task-type-scanforvirus)
+1. [Task type "analyzetext"](#task-type-analyzetext)
 
 ## Task type "transcribe"
 
@@ -315,3 +316,102 @@ When the worker finishes the task processing, following structure will be report
 |`repository`|Source code repository of the worker|
 |`version`|Version of the worker|
 |`library`|Library used to perform virus scanning|
+
+
+## Task type "analyzetext"
+
+Chat with a large language model (LLM) to let it analyze texts you give it.
+
+### Creation request
+
+The request must be of type `multipart/form-data` with the following structure.
+
+```
+------WebKitFormBoundaryd3cBH0ciOvHMpqq1
+Content-Disposition: form-data; name="json"
+
+
+{"type":"analyzetext","data":{"model": "llama3.2","messages": [{"role": "user","content": "why is the sky blue?"},{"role": "assistant","content": "due to rayleigh scattering."},{"role": "user","content": "how is that different than mie scattering?"}]}}
+------WebKitFormBoundaryd3cBH0ciOvHMpqq1--
+```
+
+The `json` part needs to have information about the task in the following format.
+
+```json
+{
+  "type": "analyzetext",
+  "data": {
+    "model": "llama3.2",
+    "messages": [
+      {
+        "role": "user",
+        "content": "why is the sky blue?"
+      },
+      {
+        "role": "assistant",
+        "content": "due to rayleigh scattering."
+      },
+      {
+        "role": "user",
+        "content": "how is that different than mie scattering?"
+      }
+    ]
+  }
+}
+```
+
+|Property|Description|
+|---|---|
+|`type`|The type must always be `analyzetext`|
+|`data`|Contains the text chat and LLM requirements|
+|`data.model`|Name of the Ollama compatible LLM model to process the text messages.|
+|`data.messages`|History of the chat messages|
+|`data.messages.role`|Role of the message. `user` represents the quentionaire, the last message should be of this role. `assistant` contains responses from the LLM.|
+|`data.messages.content`|Text content of the message|
+
+### Result response
+
+When the worker finishes the task processing, following structure will be reported back.
+
+```json
+{
+  "result" : {
+    "messages": [
+      {
+        "role": "user",
+        "content": "why is the sky blue?"
+      },
+      {
+        "role": "assistant",
+        "content": "due to rayleigh scattering."
+      },
+      {
+        "role": "user",
+        "content": "how is that different than mie scattering?"
+      },
+      {
+        "role": "assistant",
+        "content": "mie scattering occurs when light interacts with larger particles in the air."
+      }
+    ],
+    "device" : "cuda",
+    "duration" : 1.6,
+    "repository" : "https://github.com/hilderonny/taskworker-analyzetext",
+    "version" : "1.0.0",
+    "library": "Ollama 0.4",
+    "model": "llama3.2"
+  }
+}
+```
+
+|Property|Description|
+|---|---|
+|`messages`|History of the chat messages with new answers|
+|`messages.role`|Role of the message. `user` represents the quentionaire, the last message should be of this role. `assistant` contains responses from the LLM.|
+|`messages.content`|Text content of the message|
+|`device`|`cuda` for GPU processing and `cpu` for CPU processing|
+|`duration`|Time in seconds for the processing|
+|`repository`|Source code repository of the worker|
+|`version`|Version of the worker|
+|`library`|Library or application used for chatting|
+|`model`|LLM model used|
