@@ -39,7 +39,7 @@ describe("POST /api/tasks/restart/", () => {
 
   it("should return 200 when a task with the given id was found", async() => {
     const taskid = "TASK_ID"
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid }
@@ -55,7 +55,7 @@ describe("POST /api/tasks/restart/", () => {
 
   it("should save the task and set the task status to open and delete the result, worker, startedat, completedat and progress properties", async() => {
     const taskid = "TASK_ID"
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { 

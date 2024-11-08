@@ -42,7 +42,7 @@ describe("POST /api/tasks/progress/", () => {
   it("should update the progress of the task and return 200 when a matching task is found", async() => {
     const taskid = "TASK_ID"
     const progress = 55
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid }
@@ -65,7 +65,7 @@ describe("POST /api/tasks/progress/", () => {
   it("should not save the progress in the tasks file", async() => {
     const taskid = "TASK_ID"
     const progress = 55
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid }

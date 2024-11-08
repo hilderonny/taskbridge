@@ -42,7 +42,7 @@ describe("POST /api/tasks/complete/", () => {
   it("should return 200 when a task with the given id was found", async() => {
     const taskid = "TASK_ID"
     const result = { this: { is: "my result" } }
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid }
@@ -62,7 +62,7 @@ describe("POST /api/tasks/complete/", () => {
   it("should save the task on disk including result, completedat and updated status", async() => {
     const taskid = "TASK_ID"
     const result = { this: { is: "my result" } }
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid }
@@ -93,7 +93,7 @@ describe("POST /api/tasks/complete/", () => {
     const tasktype = "TYPE_TO_TEST"
     const result = { this: { is: "my result" } }
     const count = 13
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: tasktype, status: "inprogress", id: taskid }
@@ -121,7 +121,7 @@ describe("POST /api/tasks/complete/", () => {
     const taskid = "TASK_ID"
     const tasktype = "TYPE_TO_TEST"
     const result = { this: { is: "my result" } }
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: tasktype, status: "inprogress", id: taskid }

@@ -40,7 +40,7 @@ describe("POST /api/tasks/result/", () => {
   it("should return 200 and the task result when a task with the given id was found", async() => {
     const taskid = "TASK_ID"
     const result = { this: { is: "my result" } }
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid, result: result }

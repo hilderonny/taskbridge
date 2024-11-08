@@ -39,7 +39,7 @@ describe("POST /api/tasks/remove/", () => {
 
   it("should return 200 when a task with the given id was found", async() => {
     const taskid = "TASK_ID"
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid }
@@ -55,7 +55,7 @@ describe("POST /api/tasks/remove/", () => {
 
   it("should remove the task from the stored tasks on disk", async() => {
     const taskid = "TASK_ID"
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid }
@@ -75,7 +75,7 @@ describe("POST /api/tasks/remove/", () => {
     const filename = "TASK_FILE_NAME"
     const uploadpath = "./testupload"
     const fullpath = path.join(uploadpath, filename)
-    // Prepare empty tasks file
+    // Prepare tasks file
     filemocks[tasksjsonpath] = JSON.stringify({
       tasks: [
         { type: "TYPE_TO_TEST", status: "inprogress", id: taskid, file: filename }
