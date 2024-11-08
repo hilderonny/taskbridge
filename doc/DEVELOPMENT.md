@@ -24,8 +24,17 @@ A new release is created directly from the main branch and directly on GitHub.
 
 - Switch to the main branch locally and make a `git pull`
 - Change the version number in the file `package.json`
-- Compress all files and folders except `node_modules` and `upload` into a ZIP-File
+- Compress all following files and folders into a ZIP-File
+    - api
+    - app.js
+    - LICENSE
+    - openApiDocumentation.js
+    - package.json
+    - package-lock.json
+    - README.md
+    - server.js
 - Name the ZIP-File `taskbridge-<MAJOR>.<MINOR>.<BUGFIX>.zip`
+- Use this ZIP file and test the installation process
 - Create a release on GitHub and attach the ZIP-File
 - Note all changes since the previous release in the release notes
 - Publish the release
