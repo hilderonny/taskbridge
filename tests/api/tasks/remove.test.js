@@ -23,7 +23,7 @@ afterEach(() => {
   jest.restoreAllMocks()
 })
 
-describe("POST /api/tasks/remove/", () => {
+describe("DELETE /api/tasks/remove/", () => {
 
   it("should return 404 when there is no task with the given id", async() => {
     const taskid = "TASK_ID"
