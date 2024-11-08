@@ -75,7 +75,7 @@ describe("POST /api/tasks/complete/", () => {
     // Create app
     app = createApp("./testupload", "./testwebroot")
     // Call API
-    const res = await request(app).post(`/api/tasks/complete/${taskid}`).send({
+    await request(app).post(`/api/tasks/complete/${taskid}`).send({
       result: result
     })
     // Analyze stored tasks
