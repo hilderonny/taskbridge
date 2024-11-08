@@ -82,7 +82,7 @@ function createRouter(filepath) {
     })
 
     // Report task progress
-    apiRouter.post('/progress/:id', express.json({ limit: "50mb"}), function(req, res) {
+    apiRouter.post('/progress/:id', express.json(), function(req, res) {
         var matchingTask = findTask(req.params.id)
         if (!matchingTask) {
             res.status(404).send()
