@@ -331,7 +331,7 @@ The request must be of type `multipart/form-data` with the following structure.
 Content-Disposition: form-data; name="json"
 
 
-{"type":"analyzetext","data":{"model": "llama3.2","messages": [{"role": "user","content": "why is the sky blue?"},{"role": "assistant","content": "due to rayleigh scattering."},{"role": "user","content": "how is that different than mie scattering?"}]}}
+{"type":"analyzetext","data":{"messages": [{"role": "user","content": "why is the sky blue?"},{"role": "assistant","content": "due to rayleigh scattering."},{"role": "user","content": "how is that different than mie scattering?"}]}}
 ------WebKitFormBoundaryd3cBH0ciOvHMpqq1--
 ```
 
@@ -341,7 +341,6 @@ The `json` part needs to have information about the task in the following format
 {
   "type": "analyzetext",
   "data": {
-    "model": "llama3.2",
     "messages": [
       {
         "role": "user",
@@ -363,8 +362,7 @@ The `json` part needs to have information about the task in the following format
 |Property|Description|
 |---|---|
 |`type`|The type must always be `analyzetext`|
-|`data`|Contains the text chat and LLM requirements|
-|`data.model`|Name of the Ollama compatible LLM model to process the text messages.|
+|`data`|Contains the text chat|
 |`data.messages`|History of the chat messages|
 |`data.messages.role`|Role of the message. `user` represents the quentionaire, the last message should be of this role. `assistant` contains responses from the LLM.|
 |`data.messages.content`|Text content of the message|
