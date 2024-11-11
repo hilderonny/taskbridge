@@ -51,14 +51,19 @@ Currently there are several **Clients** implementations working with the **TaskB
 
 ## Known workers
 
-1. [Audio transcription](https://github.com/hilderonny/taskworker-transcribe)
-1. [Text translation](https://github.com/hilderonny/taskworker-translate)
-1. [Image classification](https://github.com/hilderonny/taskworker-classifyimage)
-1. [Virus scanning](https://github.com/hilderonny/taskworker-scanforvirus)
+|Task type|Worker|Description|
+|---|---|---|
+|`analyzetext`|[Text analysis](https://github.com/hilderonny/taskworker-analyzetext)|Reference implementation in Python for Windows and Linux|
+|`classifyimage`|[Image classification](https://github.com/hilderonny/taskworker-classifyimage)|Reference implementation in Python for Windows and Linux|
+|`scanforvirus`|[Virus scanning](https://github.com/hilderonny/taskworker-scanforvirus)|Reference implementation in Python for Windows and Linux|
+|`transcribe`|[Audio transcription](https://github.com/hilderonny/taskworker-transcribe)|Reference implementation in Python for Windows and Linux|
+|`translate`|[Text translation](https://github.com/hilderonny/taskworker-translate)|Reference implementation in Python for Windows and Linux|
 
 ## Known clients
 
-1. [Taskbridge Web UI](https://github.com/hilderonny/taskbridge-webui)
-1. [IPED audio translate task](https://github.com/hilderonny/iped-audiotranslatetask)
-1. [NUIX audio translate plugin](https://github.com/hilderonny/nuix-audiotranslateplugin)
-1. X-Ways audio translate extension (Coming soon ...)
+|Client|Task types|
+|---|---|
+|[Taskbridge Web UI](https://github.com/hilderonny/taskbridge-webui)|`analyzetext`, `classifyimage`, `scanforvirus`, `transcribe`, `translate`|
+|[IPED audio translate task](https://github.com/hilderonny/iped-audiotranslatetask)|`transcribe`, `translate`|
+|[NUIX audio translate plugin](https://github.com/hilderonny/nuix-audiotranslateplugin)|`transcribe`, `translate`|
+|X-Ways audio translate extension (Coming soon ...)|`transcribe`, `translate`|
