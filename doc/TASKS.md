@@ -392,7 +392,6 @@ When the worker finishes the task processing, following structure will be report
         "content": "mie scattering occurs when light interacts with larger particles in the air."
       }
     ],
-    "device" : "cuda",
     "duration" : 1.6,
     "repository" : "https://github.com/hilderonny/taskworker-analyzetext",
     "version" : "1.0.0",
@@ -407,7 +406,6 @@ When the worker finishes the task processing, following structure will be report
 |`messages`|History of the chat messages with new answers|
 |`messages.role`|Role of the message. `user` represents the quentionaire, the last message should be of this role. `assistant` contains responses from the LLM.|
 |`messages.content`|Text content of the message|
-|`device`|`cuda` for GPU processing and `cpu` for CPU processing|
 |`duration`|Time in seconds for the processing|
 |`repository`|Source code repository of the worker|
 |`version`|Version of the worker|
