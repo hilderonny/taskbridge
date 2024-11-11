@@ -37,6 +37,10 @@ If you have a suspicious file and want to know whether it is save to open it, yo
 
 ![Web UI - Scan for virus](doc/images/webui-scanforvirus.png)
 
+When you need to analyzes or rephrase a text you can chat with it like with ChatGPT.
+
+![Web UI - Analyze text](doc/images/webui-analyzetext.png)
+
 In the **Workers** tab you get an overview of all workers currently connected to the **TaskBridge** including their current status and abilities.
 
 ![Web UI - Workers](doc/images/webui-workers.png)
