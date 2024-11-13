@@ -49,9 +49,14 @@ Currently there are several **Clients** implementations working with the **TaskB
 
 ![IPED Task](doc/images/iped-task.png)
 
-... and a Ruby plugin for [NUIX](https://www.nuix.com/)
+... a Ruby plugin for [NUIX](https://www.nuix.com/) ...
 
 ![NUIX plugin](doc/images/nuix-plugin.png)
+
+... and an X-Tension for [X-Ways](https://www.x-ways.net/).
+
+![X-Ways X-Tension](doc/images/xways-extension.png)
+
 
 ## Known workers
 
@@ -70,4 +75,4 @@ Currently there are several **Clients** implementations working with the **TaskB
 |[Taskbridge Web UI](https://github.com/hilderonny/taskbridge-webui)|`analyzetext`, `classifyimage`, `scanforvirus`, `transcribe`, `translate`|
 |[IPED audio translate task](https://github.com/hilderonny/iped-audiotranslatetask)|`transcribe`, `translate`|
 |[NUIX audio translate plugin](https://github.com/hilderonny/nuix-audiotranslateplugin)|`transcribe`, `translate`|
-|X-Ways audio translate extension (Coming soon ...)|`transcribe`, `translate`|
+|[X-Ways audio translate X-Tension](https://github.com/hilderonny/xways-audiotranslate)|`transcribe`, `translate`|
