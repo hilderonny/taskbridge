@@ -403,6 +403,35 @@ module.exports = {
                 }
             }
         },
+        "/api/tasks/workerstatistics": {
+            get: {
+                tags: [ "Tasks" ],
+                description: "Get statistics of completed tasks goruped by workers - How many tasks of a specific type were processed by which worker?",
+                responses: {
+                    "200": {
+                        description: "File of the task if the task has one",
+                        content: {
+                           "application/json": {
+                                schema: {
+                                    type: "object",
+                                    description: "For each existing worker name and task type this object has a property with the number of processed tasks as value",
+                                    example: {
+                                        "SENECA-GPU0": {
+                                            "transcribe": 12345,
+                                            "translate": 2345
+                                        },
+                                        "RH-WORKBOOK": {
+                                            "transcribe": 345,
+                                            "translate": 34
+                                        },
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/workers/list/": {
             get: {
                 tags: [ "Workers" ],

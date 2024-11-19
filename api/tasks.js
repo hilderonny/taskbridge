@@ -11,6 +11,7 @@ function createRouter(filepath) {
 
     var tasks = []
     var statistics = {}
+    var workerstatistics = {}
 
     const tasksjsonpath = "./tasks.json"
 
@@ -19,6 +20,7 @@ function createRouter(filepath) {
         var jsonData = JSON.parse(filecontent)
         tasks = jsonData.tasks
         statistics = jsonData.statistics
+        workerstatistics = jsonData.workerstatistics || {}
     }
 
     var apiRouter = express.Router()
@@ -33,7 +35,8 @@ function createRouter(filepath) {
     function save() {
         const content = JSON.stringify({
             tasks: tasks,
-            statistics: statistics
+            statistics: statistics,
+            workerstatistics: workerstatistics
         })
         fs.writeFileSync(tasksjsonpath, content, "utf8")
     }
@@ -105,6 +108,14 @@ function createRouter(filepath) {
                 statistics[matchingTask.type] += 1
             } else {
                 statistics[matchingTask.type] = 1
+            }
+            if (!workerstatistics[matchingTask.worker]) {
+                workerstatistics[matchingTask.worker] = {}
+            }
+            if (workerstatistics[matchingTask.worker][matchingTask.type]) {
+                workerstatistics[matchingTask.worker][matchingTask.type] += 1
+            } else {
+                workerstatistics[matchingTask.worker][matchingTask.type] = 1
             }
             save()
             res.status(200).send()
@@ -213,6 +224,10 @@ function createRouter(filepath) {
 
     apiRouter.get("/statistics/", function(_, res) {
         res.status(200).send(statistics)
+    })
+
+    apiRouter.get("/workerstatistics/", function(_, res) {
+        res.status(200).send(workerstatistics)
     })
 
     return apiRouter
