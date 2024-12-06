@@ -233,6 +233,27 @@ Response
 ]
 ```
 
+## Get worker statistics
+
+```
+GET /api/tasks/workerstatistics/
+```
+
+Response
+
+```json
+{
+	"SENECA-GPU0": {
+		"transcribe": 12345,
+		"translate": 2345
+	},
+	"RH-WORKBOOK": {
+		"transcribe": 345,
+		"translate": 34
+	}
+}
+```
+
 ## Get version of TaskBridge
 
 Use this API if you need to fetch the version number of the running TaskBridge instance. The response is in plain text.
