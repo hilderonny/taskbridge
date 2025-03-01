@@ -1,0 +1,9 @@
+node_modules
+upload
+tasks.json
+apidoc
+coverage
+testupload
+testwebroot
+.vscode
+.github
