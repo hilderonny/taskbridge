@@ -1,6 +1,6 @@
 # Installation
 
-Depending on where and how you want to run TaskBridge you have several options. For all of them you need following prerequisites:
+Depending on where and how you want to run TaskBridge you have several options. For all of them (except Docker) you need following prerequisites:
 
 - Install [NodeJS](https://nodejs.org/)
 - Download and extract tha latest release of the TaskBridge
@@ -9,6 +9,9 @@ Depending on where and how you want to run TaskBridge you have several options. 
 If you want to have an optional web user interface, download a release of the WebUI from https://github.com/hilderonny/taskbridge-webui/ and extract it to a folder of your choice.
 
 ### Running the docker image (Preferred way)
+
+Download and install [Docker](https://www.docker.com/products/docker-desktop/)
+on your system.
 
 When running the image into a container, map the port 8080 of the container to a port where the
 outer world has access to (e.g. 42000).
