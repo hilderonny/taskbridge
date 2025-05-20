@@ -74,5 +74,7 @@ Currently there are several **Clients** implementations working with the **TaskB
 |---|---|
 |[Taskbridge Web UI](https://github.com/hilderonny/taskbridge-webui)|`analyzetext`, `classifyimage`, `scanforvirus`, `transcribe`, `translate`|
 |[IPED audio translate task](https://github.com/hilderonny/iped-audiotranslatetask)|`transcribe`, `translate`|
+|[IPED image classification task](https://github.com/hilderonny/iped-imageclassificationtask)|`classifyimage`|
+|[IPED virus scan task](https://github.com/hilderonny/iped-virusscantask)|`scanforvirus`|
 |[NUIX audio translate plugin](https://github.com/hilderonny/nuix-audiotranslateplugin)|`transcribe`, `translate`|
 |[X-Ways audio translate X-Tension](https://github.com/hilderonny/xways-audiotranslate)|`transcribe`, `translate`|
