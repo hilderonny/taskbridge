@@ -14,7 +14,8 @@
             "program": "${workspaceFolder}\\server.js",
             "env": {
                 "PORT": "8080",
-                "TASKFILE": "./tasks.json"
+                "FILEPATH": "./upload",
+                "WEBROOT": "../taskbridge-webui"
             }
         }
     ]
