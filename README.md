@@ -1,5 +1,29 @@
 # TaskBridge
 
+Starten
+
+```sh
+go run .
+```
+
+Bauen
+
+```sh
+go build -o server .
+./server
+```
+
+Docker
+
+```sh
+docker build -t taskbridge .
+```
+
+
+
+
+
+
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/hilderonny/taskbridge)
 
 **TaskBridge** is a NodeJS application for distributed computing. There is one server as central communication endpoint which handles the distribution of tasks. **Clients** can set tasks for processing which the server stores in a holding pattern until the get fetched and processed by **workers**.

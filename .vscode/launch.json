@@ -5,18 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Debug",
+            "type": "go",
             "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\server.js",
-            "env": {
-                "PORT": "8080",
-                "FILEPATH": "./upload",
-                "WEBROOT": "../taskbridge-webui"
-            }
+            "mode": "auto",
+            "program": "${workspaceFolder}"
         }
     ]
 }

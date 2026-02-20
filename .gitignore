@@ -1,7 +1,1 @@
-node_modules
-upload
-tasks.json
-apidoc
-coverage
-testupload
-testwebroot
+__debug_bin.exe
