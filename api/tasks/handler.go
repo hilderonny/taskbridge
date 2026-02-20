@@ -16,7 +16,7 @@ type TasksJsonStruct struct {
 	Statistics map[string]int `json:"statistics,omitempty"`
 }
 
-type TaskStruct struct {
+type TaskListStruct struct {
 	CompletedAt int64  `json:"completedat,omitempty"`
 	CreatedAt   int64  `json:"createdat,omitempty"`
 	File        string `json:"file,omitempty"`
@@ -26,6 +26,21 @@ type TaskStruct struct {
 	Status      string `json:"status,omitempty"`
 	Type        string `json:"type,omitempty"`
 	Worker      string `json:"worker,omitempty"`
+}
+
+type TaskStruct struct {
+	CompletedAt  int64          `json:"completedat,omitempty"`
+	CreatedAt    int64          `json:"createdat,omitempty"`
+	Data         map[string]any `json:"data,omitempty"`
+	File         string         `json:"file,omitempty"`
+	Id           string         `json:"id,omitempty"`
+	Progress     int            `json:"progress,omitempty"`
+	Requirements map[string]any `json:"requirements,omitempty"`
+	Result       map[string]any `json:"result,omitempty"`
+	StartedAt    int64          `json:"startedat,omitempty"`
+	Status       string         `json:"status,omitempty"`
+	Type         string         `json:"type,omitempty"`
+	Worker       string         `json:"worker,omitempty"`
 }
 
 /********** Konstanten **********/
@@ -41,6 +56,29 @@ func Cleanup() {
 	for _, directoryEntry := range directoryEntries {
 		os.RemoveAll(path.Join([]string{FILES_ROOT, directoryEntry.Name()}...))
 	}
+}
+
+func (task TaskStruct) ForList() TaskListStruct {
+	return TaskListStruct{
+		CompletedAt: task.CompletedAt,
+		CreatedAt:   task.CreatedAt,
+		File:        task.File,
+		Id:          task.Id,
+		Progress:    task.Progress,
+		StartedAt:   task.StartedAt,
+		Status:      task.Status,
+		Type:        task.Type,
+		Worker:      task.Worker,
+	}
+}
+
+func GetTaskById(taskId string) *TaskStruct {
+	for i := range TASKS_JSON.Tasks {
+		if TASKS_JSON.Tasks[i].Id == taskId {
+			return &TASKS_JSON.Tasks[i]
+		}
+	}
+	return nil
 }
 
 func LoadTasksJson() {
@@ -73,13 +111,24 @@ func Complete(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func Details(responseWriter http.ResponseWriter, request *http.Request) {
+	taskId := request.PathValue("taskid")
+	task := GetTaskById(taskId)
+	if task == nil {
+		responseWriter.WriteHeader(404)
+		return
+	}
+	RespondWithJson(responseWriter, task)
 }
 
 func File(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func List(responseWriter http.ResponseWriter, request *http.Request) {
-	RespondWithJson(responseWriter, TASKS_JSON.Tasks)
+	taskList := make([]TaskListStruct, len(TASKS_JSON.Tasks))
+	for i := range TASKS_JSON.Tasks {
+		taskList[i] = TASKS_JSON.Tasks[i].ForList()
+	}
+	RespondWithJson(responseWriter, taskList)
 }
 
 func Progress(responseWriter http.ResponseWriter, request *http.Request) {
