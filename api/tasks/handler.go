@@ -1,12 +1,15 @@
 package tasks
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 )
 
 /********** Strukturen **********/
@@ -105,6 +108,28 @@ func SaveTasksJson(tasksJson TasksJsonStruct) {
 /********** API - Funktionen **********/
 
 func Add(responseWriter http.ResponseWriter, request *http.Request) {
+	request.ParseMultipartForm(32 << 20)
+	// JSON Daten
+	jsonData := request.FormValue("json")
+	newTask := TaskStruct{
+		CreatedAt: time.Now().UTC().UnixMilli(),
+		Id:        rand.Text(),
+		Status:    "open",
+	}
+	newTask.File = newTask.Id // Filename is the same as the Id
+	json.Unmarshal([]byte(jsonData), &newTask)
+	// Datei speichern
+	requestFile, _, _ := request.FormFile("file")
+	defer requestFile.Close()
+	filePath := path.Join([]string{FILES_ROOT, newTask.File}...)
+	os.MkdirAll(filepath.Dir(filePath), 0755)
+	localFile, _ := os.Create(filePath)
+	defer localFile.Close()
+	io.Copy(localFile, requestFile)
+	// Task speichern
+	TASKS_JSON.Tasks = append(TASKS_JSON.Tasks, newTask)
+	SaveTasksJson(TASKS_JSON)
+	RespondWithJson(responseWriter, newTask)
 }
 
 func Complete(responseWriter http.ResponseWriter, request *http.Request) {
@@ -166,7 +191,7 @@ func Register(filesRoot string, tasksJsonPath string) {
 	// Tasks laden
 	LoadTasksJson()
 	// API Routen registrieren
-	http.HandleFunc("POST /api/tasks/add", Add)
+	http.HandleFunc("POST /api/tasks/add/", Add)
 	http.HandleFunc("POST /api/tasks/complete/{taskid}", Complete)
 	http.HandleFunc("GET /api/tasks/details/{taskid}", Details)
 	http.HandleFunc("GET /api/tasks/file/{taskid}", File)
