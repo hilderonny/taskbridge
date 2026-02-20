@@ -13,12 +13,14 @@ import (
 var VERSION string = "2.0.0"
 
 var FILES_ROOT string = "./data/files"
+var TASKS_JSON_PATH string = "./data/tasks.json"
+
 var WEB_ROOT string = "./html"
 
 func main() {
 
 	// API-Endpunkte
-	tasks.Register(FILES_ROOT)
+	tasks.Register(FILES_ROOT, TASKS_JSON_PATH)
 	version.Register(VERSION)
 	workers.Register()
 
