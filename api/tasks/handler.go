@@ -160,9 +160,25 @@ func Progress(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func Remove(responseWriter http.ResponseWriter, request *http.Request) {
+	taskId := request.PathValue("taskid")
+	for index, task := range TASKS_JSON.Tasks {
+		if task.Id == taskId {
+			TASKS_JSON.Tasks = append(TASKS_JSON.Tasks[:index], TASKS_JSON.Tasks[index+1:]...)
+			return
+		}
+	}
+	responseWriter.WriteHeader(404)
 }
 
 func Restart(responseWriter http.ResponseWriter, request *http.Request) {
+	taskId := request.PathValue("taskid")
+	task := GetTaskById(taskId)
+	if task == nil {
+		responseWriter.WriteHeader(404)
+		return
+	}
+	task.Status = "open"
+	SaveTasksJson(TASKS_JSON)
 }
 
 func Result(responseWriter http.ResponseWriter, request *http.Request) {
