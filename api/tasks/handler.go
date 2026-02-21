@@ -31,6 +31,11 @@ type TaskListStruct struct {
 	Worker      string `json:"worker,omitempty"`
 }
 
+type TaskStatusStruct struct {
+	Progress int    `json:"progress,omitempty"`
+	Status   string `json:"status,omitempty"`
+}
+
 type TaskStruct struct {
 	CompletedAt  int64          `json:"completedat,omitempty"`
 	CreatedAt    int64          `json:"createdat,omitempty"`
@@ -54,13 +59,6 @@ var TASKS_JSON TasksJsonStruct
 
 /********** Hilfsfunktionen **********/
 
-func Cleanup() {
-	directoryEntries, _ := os.ReadDir(FILES_ROOT)
-	for _, directoryEntry := range directoryEntries {
-		os.RemoveAll(path.Join([]string{FILES_ROOT, directoryEntry.Name()}...))
-	}
-}
-
 func (task TaskStruct) ForList() TaskListStruct {
 	return TaskListStruct{
 		CompletedAt: task.CompletedAt,
@@ -72,6 +70,13 @@ func (task TaskStruct) ForList() TaskListStruct {
 		Status:      task.Status,
 		Type:        task.Type,
 		Worker:      task.Worker,
+	}
+}
+
+func (task TaskStruct) ForStatus() TaskStatusStruct {
+	return TaskStatusStruct{
+		Progress: task.Progress,
+		Status:   task.Status,
 	}
 }
 
@@ -163,6 +168,8 @@ func Remove(responseWriter http.ResponseWriter, request *http.Request) {
 	taskId := request.PathValue("taskid")
 	for index, task := range TASKS_JSON.Tasks {
 		if task.Id == taskId {
+			filePath := path.Join([]string{FILES_ROOT, task.File}...)
+			os.RemoveAll(filePath)
 			TASKS_JSON.Tasks = append(TASKS_JSON.Tasks[:index], TASKS_JSON.Tasks[index+1:]...)
 			return
 		}
@@ -189,6 +196,13 @@ func Statistics(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func Status(responseWriter http.ResponseWriter, request *http.Request) {
+	taskId := request.PathValue("taskid")
+	task := GetTaskById(taskId)
+	if task == nil {
+		responseWriter.WriteHeader(404)
+		return
+	}
+	RespondWithJson(responseWriter, task.ForStatus())
 }
 
 func Take(responseWriter http.ResponseWriter, request *http.Request) {
@@ -202,8 +216,6 @@ func WorkerStatistics(responseWriter http.ResponseWriter, request *http.Request)
 func Register(filesRoot string, tasksJsonPath string) {
 	FILES_ROOT = filesRoot
 	TASKS_JSON_PATH = tasksJsonPath
-	// Dateiverzeichnis nach Neustart bereinigen, falls da altes Zeugs drin liegt
-	Cleanup()
 	// Tasks laden
 	LoadTasksJson()
 	// API Routen registrieren
