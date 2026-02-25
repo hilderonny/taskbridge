@@ -29,10 +29,10 @@ func main() {
 
 	// HTTPS-Server starten, geht in Endlosschleife
 	server := &http.Server{
-		Addr:     ":3000",
+		Addr:     ":3001",
 		Handler:  nil,
 		ErrorLog: log.New(io.Discard, "", 0),
 	}
-	fmt.Println("Taskbridge running at port 3000")
+	fmt.Println("Taskbridge running at port 3001")
 	server.ListenAndServeTLS("server.crt", "server.key")
 }

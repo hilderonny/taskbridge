@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+
+            * { font-family: sans-serif; font-size: 12pt; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
+            body { padding: 32px; display: flex; flex-direction: column; }
+
+            h1 { font-size: 24pt; margin: 0 0 24px 0; color: #1e2f55; }
+
+            .content { flex: 1; display: flex; flex-direction: column; overflow: auto; }
+            .content .output { flex: 1; overflow: auto; margin-bottom: 16px; }
+            .content .output .message { padding: 12px; border-radius: 12px; margin-bottom: 16px; }
+            .content .output .message.system { background-color: #f8f8f8; color: #cccccc; }
+            .content .output .message.user { background-color: lightskyblue; border-bottom-right-radius: 0; margin-left: 64px; }
+            .content .output .message.assistant { border-bottom-left-radius: 0; border: 1px solid #eeeeee; margin-right: 64px; }
+            .content .output .message.waiting { background-color: antiquewhite; }
+            .content .inputbar { display: flex; flex-direction: row; }
+            .content .inputbar .input { flex: 1; border: 1px solid #888888; box-shadow: 0px 0px 3px 0px #888888 inset; padding: 4px; }
+            .content .inputbar .input::placeholder { color: #aaaaaa; }
+            .content .inputbar button { background: #f1f2f4; border: none; border-radius: 3px; padding: 8px; cursor: pointer; margin-left: 8px; }
+            .content .inputbar button:hover { background-color: #d5d6d8; }
+
+        </style>
+        <script type="text/javascript" src="mespeak.js"></script>
+        <script type="module">
+
+            meSpeak.loadVoice("voices/de.json")
+
+            import TASKBRIDGE from './taskbridge.js'
+
+            import {micromark} from "./micromark.bundle.mjs"
+
+            var taskidtowaitfor = undefined
+            var outputdiv = document.querySelector(".content .output")
+            var firstchathistory = []
+            var secondchathistory = []
+            var systemmessage = {
+                role: "system",
+                content: "Du bist ein neugieriges Kind, das alles von mir wissen möchte. Du antwortest kurz und kreativ. Deine Rückfragen sind ebenfalls kurz und kreativ."
+            }
+            var firstmessage = {
+                role: "user",
+                content: "Denke Dir ein Thema aus und stelle mir dazu eine Frage."
+            }
+            var currentsender = "second"
+            var running = false
+
+            var iswaiting = false
+            var waitingdiv = document.createElement("div")
+            waitingdiv.classList.add("message")
+            waitingdiv.classList.add("waiting")
+
+            function showmessagehistory() {
+                outputdiv.innerHTML = ""
+                var maxlength = Math.max(firstchathistory.length, secondchathistory.length)
+                for (var i = 0; i < maxlength; i++) {
+                    if (firstchathistory.length > i) {
+                        var messagediv = document.createElement("div")
+                        messagediv.classList.add("message")
+                        messagediv.classList.add("user")
+                        var htmlcontent = micromark(firstchathistory[i])
+                        messagediv.innerHTML = htmlcontent
+                        outputdiv.appendChild(messagediv)
+                    }
+                    if (secondchathistory.length > i) {
+                        var messagediv = document.createElement("div")
+                        messagediv.classList.add("message")
+                        messagediv.classList.add("assistant")
+                        var htmlcontent = micromark(secondchathistory[i])
+                        messagediv.innerHTML = htmlcontent
+                        outputdiv.appendChild(messagediv)
+                    }
+                }
+                waitingdiv.style.display = iswaiting ? "block" : "none"
+                outputdiv.appendChild(waitingdiv)
+                outputdiv.scrollTop = outputdiv.scrollHeight
+            }
+
+            function statusCallback(taskStatus) {
+                iswaiting = true
+                waitingdiv.style.display = "block"
+                waitingdiv.innerText = `Waiting for result of task ${taskidtowaitfor} (${taskStatus.status}${taskStatus.progress ? " " + taskStatus.progress + "%" : ""}) ...`
+                outputdiv.scrollTop = outputdiv.scrollHeight
+            }
+
+            async function completionCallback(taskResult) {
+                iswaiting = false
+
+                if (taskResult) {
+                    var lastmessage = taskResult.messages[taskResult.messages.length - 1].content
+
+                    if (currentsender === "second") {
+                        firstchathistory.push(lastmessage)
+                        currentsender = "first"
+                    } else {
+                        secondchathistory.push(lastmessage)
+                        currentsender = "second"
+                    }
+
+                    showmessagehistory()
+
+                    meSpeak.speak(lastmessage, 1, async() => {
+                        if (running) {
+                            await send()
+                        }
+                    })
+                }
+
+            }
+
+            async function send() {
+
+                var messages = createmessagestosend()
+
+                const data = {
+                    model: "llama3.2",
+                    messages: messages
+                }
+
+                var addResult = await TASKBRIDGE.addTask('analyzetext', data)
+                taskidtowaitfor = addResult.id
+
+                TASKBRIDGE.waitForTaskCompletion(taskidtowaitfor, statusCallback, completionCallback)
+
+            }
+
+            function createmessagestosend() {
+                var maxlength = Math.max(firstchathistory.length, secondchathistory.length)
+                var messages = []
+                messages.push(systemmessage)
+                if (currentsender === "second") {
+                    messages.push(firstmessage)
+                    for (var i = 0; i < maxlength; i++) {
+                        if (firstchathistory.length > i) {
+                            messages.push({ role: "user", content: firstchathistory[i] })
+                        }
+                        if (secondchathistory.length > i) {
+                            messages.push({ role: "user", content: secondchathistory[i] })
+                        }
+                    }
+                } else {
+                    for (var i = 0; i < maxlength; i++) {
+                        if (secondchathistory.length > i) {
+                            messages.push({ role: "user", content: secondchathistory[i] })
+                        }
+                        if (firstchathistory.length > i) {
+                            messages.push({ role: "user", content: firstchathistory[i] })
+                        }
+                    }
+                }
+                return messages
+            }
+
+            function start() {
+                running = true
+                firstchathistory = []
+                secondchathistory = []
+                currentsender = "second"
+                send()
+                showmessagehistory()
+            }
+
+            function stop() {
+                running = false
+            }
+
+            function save() {
+                var atag = document.createElement("a")
+                atag.style.display = "none"
+                atag.setAttribute("href", `data:text/plain;charset=utf-8,${encodeURIComponent(JSON.stringify(createmessagestosend(), null, 2))}`)
+                atag.setAttribute("download", `${Date.now()}.atc.json`) // atc = Analyze Text Chat
+                document.body.appendChild(atag)
+                atag.click()
+                document.body.removeChild(atag)
+            }
+
+            document.querySelector(".content .inputbar .start").addEventListener("click", start)
+            document.querySelector(".content .inputbar .stop").addEventListener("click", stop)
+            document.querySelector(".content .inputbar .save").addEventListener("click", save)
+
+        </script>
+    </head>
+    <body>
+
+        <h1>Chatting bots</h1>
+
+        <div class="content">
+            <div class="output"></div>
+            <div class="inputbar">
+                <button class="start">Start</button>
+                <button class="stop">Stop</button>
+                <button class="save">Save</button>
+            </div>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+
+            * { font-size: 12pt; color: #1e2f55; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; margin: 0; padding: 0; }
+            body { font-family: sans-serif; padding: 32px; display: flex; flex-direction: column; }
+
+            h1 { font-size: 24pt; margin: 0 0 24px 0; }
+
+            .content { flex: 1; display: flex; flex-direction: column; overflow: auto; }
+            .content .output { flex: 1; overflow: auto; margin-bottom: 16px; }
+            .content .output .message { padding: 12px; border-radius: 12px; margin-bottom: 16px; }
+            .content .output .message.user { background-color: lightskyblue; border-bottom-right-radius: 0; margin-left: 64px; }
+            .content .output .message.assistant { border-bottom-left-radius: 0; border: 1px solid #eeeeee; margin-right: 64px; }
+            .content .output .message.waiting { background-color: antiquewhite; }
+            .content .inputbar { display: flex; flex-direction: row; }
+            .content .inputbar .input { flex: 1; border: 1px solid #888888; box-shadow: 0px 0px 3px 0px #888888 inset; padding: 4px; }
+            .content .inputbar .input::placeholder { color: #aaaaaa; }
+            .content .inputbar button { background: #f1f2f4; border: none; border-radius: 3px; padding: 8px; cursor: pointer; margin-left: 8px; }
+            .content .inputbar button:hover { background-color: #d5d6d8; }
+
+        </style>
+        <script type="module">
+
+            import TASKBRIDGE from './taskbridge.js'
+
+            import {micromark} from "./micromark.bundle.mjs"
+
+            var taskidtowaitfor = undefined
+            var outputdiv = document.querySelector(".content .output")
+
+            var iswaiting = false
+            var waitingdiv = document.createElement("div")
+            waitingdiv.classList.add("message")
+            waitingdiv.classList.add("waiting")
+
+            function showmessagehistory() {
+                outputdiv.innerHTML = ""
+                for (var message of chathistory) {
+                    var messagediv = document.createElement("div")
+                    messagediv.classList.add("message")
+                    messagediv.classList.add(message.role)
+                    var htmlcontent = micromark(message.content)
+                    messagediv.innerHTML = htmlcontent
+                    outputdiv.appendChild(messagediv)
+                }
+                waitingdiv.style.display = iswaiting ? "block" : "none"
+                outputdiv.appendChild(waitingdiv)
+                outputdiv.scrollTop = outputdiv.scrollHeight
+            }
+            
+            function statusCallback(taskStatus) {
+                iswaiting = true
+                waitingdiv.style.display = "block"
+                waitingdiv.innerText = `Waiting for result of task ${taskidtowaitfor} (${taskStatus.status}${taskStatus.progress ? " " + taskStatus.progress + "%" : ""}) ...`
+                outputdiv.scrollTop = outputdiv.scrollHeight
+            }
+
+            function completionCallback(taskResult) {
+                iswaiting = false
+                if (taskResult) {
+                    chathistory = taskResult.messages
+                    localStorage.setItem("analyzetext-chathistory", JSON.stringify(chathistory))
+                    showmessagehistory()
+                }
+                localStorage.removeItem("analyzetext-taskidtowaitfor")
+            }
+
+            async function send() {
+                var usermessagecontent = document.querySelector(".content .inputbar .input").value
+                var newmessage = {
+                    role: "user",
+                    content: usermessagecontent
+                }
+                chathistory.push(newmessage)
+
+                const data = {
+                    model: "llama3.2",
+                    messages: chathistory
+                }
+
+                var addResult = await TASKBRIDGE.addTask('analyzetext', data)
+                taskidtowaitfor = addResult.id
+
+                localStorage.setItem("analyzetext-chathistory", JSON.stringify(chathistory))
+                localStorage.setItem("analyzetext-taskidtowaitfor", taskidtowaitfor)
+
+                document.querySelector(".content .inputbar .input").value = ""
+                showmessagehistory()
+
+                TASKBRIDGE.waitForTaskCompletion(taskidtowaitfor, statusCallback, completionCallback)
+
+            }
+
+            var chathistory = []
+
+            var storedchathistory = localStorage.getItem("analyzetext-chathistory")
+            if (storedchathistory) {
+                chathistory = JSON.parse(storedchathistory)
+                showmessagehistory()
+            }
+            var lasttaskidtowaitfor = localStorage.getItem("analyzetext-taskidtowaitfor")
+            if (lasttaskidtowaitfor) {
+                TASKBRIDGE.waitForTaskCompletion(lasttaskidtowaitfor, statusCallback, completionCallback)
+            }
+
+            function clear() {
+                if (confirm("Really delete chat and restart?")) {
+                    chathistory = []
+                    localStorage.setItem("analyzetext-chathistory", JSON.stringify(chathistory))
+                    showmessagehistory()
+                }
+            }
+
+            function save() {
+                var atag = document.createElement("a")
+                atag.style.display = "none"
+                atag.setAttribute("href", `data:text/plain;charset=utf-8,${encodeURIComponent(JSON.stringify(chathistory))}`)
+                atag.setAttribute("download", `${Date.now()}.atc.json`) // atc = Analyze Text Chat
+                document.body.appendChild(atag)
+                atag.click()
+                document.body.removeChild(atag)
+            }
+
+            function load() {
+                const fileinput = document.createElement("input")
+                fileinput.setAttribute("type", "file")
+                fileinput.setAttribute("accept", ".atc.json")
+                fileinput.addEventListener("change", e => {
+                    var file = e.target.files[0]
+                    if (file) {
+                        var reader = new FileReader()
+                        reader.onload = function(readerevent) {
+                            var filecontent = readerevent.target.result
+                            chathistory = JSON.parse(filecontent)
+                            localStorage.setItem("analyzetext-chathistory", JSON.stringify(chathistory))
+                            showmessagehistory()
+                        }
+                        reader.readAsText(file)
+                    }
+                })
+                document.body.appendChild(fileinput)
+                fileinput.style.display = "none"
+                fileinput.click()
+                document.body.removeChild(fileinput)
+            }
+
+            document.querySelector(".content .inputbar .input").addEventListener("keypress", e => {
+                if (e.code === "Enter" && e.ctrlKey) {
+                    send()
+                }
+            })
+            document.querySelector(".content .inputbar .send").addEventListener("click", send)
+            document.querySelector(".content .inputbar .save").addEventListener("click", save)
+            document.querySelector(".content .inputbar .load").addEventListener("click", load)
+            document.querySelector(".content .inputbar .clear").addEventListener("click", clear)
+
+        </script>
+    </head>
+    <body>
+
+        <h1>Analyze text</h1>
+
+        <div class="content">
+            <div class="output"></div>
+            <div class="inputbar">
+                <textarea class="input"></textarea>
+                <button class="send">Send</button>
+                <button class="save">Save</button>
+                <button class="load">Load</button>
+                <button class="clear">Clear</button>
+            </div>
+        </div>
+
+    </body>
+</html>
