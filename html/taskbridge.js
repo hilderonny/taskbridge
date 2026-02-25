@@ -54,7 +54,7 @@ async function getTaskResult(taskId) {
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#get-task-statistics
 async function getTaskStatistics() {
     const response = await fetch('/api/tasks/statistics/')
-    const statistics = await response.json()
+    const statistics = await response.json() || {}
     return statistics
 }
 
@@ -83,7 +83,7 @@ async function getWorkerList() {
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#get-worker-statistics
 async function getWorkerStatistics() {
     const response =  await fetch(`/api/tasks/workerstatistics/`)
-    const statistics = await response.json()
+    const statistics = await response.json() || {}
     return statistics
 }
 

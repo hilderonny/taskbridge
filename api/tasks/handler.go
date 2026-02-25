@@ -92,7 +92,10 @@ func GetTaskById(taskId string) *TaskStruct {
 func LoadTasksJson() {
 	if _, err := os.Stat(TASKS_JSON_PATH); errors.Is(err, os.ErrNotExist) {
 		os.MkdirAll(filepath.Dir(TASKS_JSON_PATH), 0755)
-		TASKS_JSON = TasksJsonStruct{}
+		TASKS_JSON = TasksJsonStruct{
+			Tasks:      []TaskStruct{},
+			Statistics: map[string]int{},
+		}
 		SaveTasksJson(TASKS_JSON)
 	} else {
 		fileContent, _ := os.ReadFile(TASKS_JSON_PATH)
