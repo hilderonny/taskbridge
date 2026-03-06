@@ -3,14 +3,11 @@ package main
 import (
 	"fmt"
 	"hilderonny/taskbridge/api/tasks"
-	"hilderonny/taskbridge/api/version"
 	"hilderonny/taskbridge/api/workers"
 	"io"
 	"log"
 	"net/http"
 )
-
-var VERSION string = "2.0.0"
 
 var FILES_ROOT string = "./data/files"
 var TASKS_JSON_PATH string = "./data/tasks.json"
@@ -21,7 +18,6 @@ func main() {
 
 	// API-Endpunkte
 	tasks.Register(FILES_ROOT, TASKS_JSON_PATH)
-	version.Register(VERSION)
 	workers.Register()
 
 	// Statische HTML Seiten ausliefern, wird reingemountet

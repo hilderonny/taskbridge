@@ -24,9 +24,10 @@ const (
 
 func GetWorkerByNameAndTypeOrCreateIt(workerName string, workerType string) *WorkerStruct {
 	var workerReference *WorkerStruct
-	for _, worker := range WORKERS {
+	for i := range WORKERS {
+		worker := &WORKERS[i]
 		if worker.Name == workerName {
-			workerReference = &worker
+			workerReference = worker
 			break
 		}
 	}
@@ -45,10 +46,11 @@ func List(responseWriter http.ResponseWriter, request *http.Request) {
 	for i, worker := range WORKERS {
 		timeSinceLastPingInSeconds := time.Since(worker.LastPingAt)
 		filteredWorker := make(map[string]string)
+		filteredWorker["lastping"] = strconv.FormatInt(timeSinceLastPingInSeconds.Milliseconds(), 10)
 		filteredWorker["name"] = worker.Name
 		filteredWorker["type"] = worker.Type
 		filteredWorker["status"] = worker.Status
-		filteredWorker["lastping"] = strconv.FormatInt(timeSinceLastPingInSeconds.Milliseconds(), 10)
+		filteredWorker["taskid"] = worker.TaskId
 		filteredWorkers[i] = filteredWorker
 	}
 	json.NewEncoder(responseWriter).Encode(filteredWorkers)
