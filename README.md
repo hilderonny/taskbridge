@@ -1,5 +1,10 @@
 # TaskBridge
 
+## Lokal einrichten
+
+```
+go init
+
 Starten
 
 ```sh
