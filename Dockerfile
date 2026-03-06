@@ -15,5 +15,6 @@ COPY --from=build /out/server /app/server
 COPY ./server.crt /app/
 COPY ./server.key /app/
 ENV GIN_MODE=release
+ENV PORT=3000
 EXPOSE 3000
 ENTRYPOINT ["/app/server"]

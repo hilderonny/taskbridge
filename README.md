@@ -4,30 +4,22 @@
 
 ```
 go init
-
-Starten
-
-```sh
-go run .
 ```
 
-Bauen
+## Bauen und starten
 
 ```sh
-go build -o server .
-./server
+go build -o taskbridge .
+PORT=3000 ./taskbridge
 ```
 
-Docker
+## Docker erstellen
 
 ```sh
 docker build -t taskbridge .
 ```
 
 - Kein HTTPS, da die Worker aktuell damit nicht klar kommen.
-
-
-
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/hilderonny/taskbridge)
 
