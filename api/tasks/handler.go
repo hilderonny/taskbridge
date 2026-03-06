@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"hilderonny/taskbridge/api/workers"
 	"io"
 	"net/http"
 	"os"
@@ -14,41 +16,47 @@ import (
 
 /********** Strukturen **********/
 
+type TakeRequest struct {
+	Type   string `json:"type"`
+	Worker string `json:"worker"`
+}
+
 type TasksJsonStruct struct {
-	Tasks      []TaskStruct   `json:"tasks,omitempty"`
-	Statistics map[string]int `json:"statistics,omitempty"`
+	Tasks            []TaskStruct   `json:"tasks"`
+	Statistics       map[string]int `json:"statistics"`
+	WorkerStatistics map[string]int `json:"workerstatistics"`
 }
 
 type TaskListStruct struct {
 	CompletedAt int64  `json:"completedat,omitempty"`
-	CreatedAt   int64  `json:"createdat,omitempty"`
+	CreatedAt   int64  `json:"createdat"`
 	File        string `json:"file,omitempty"`
-	Id          string `json:"id,omitempty"`
+	Id          string `json:"id"`
 	Progress    int    `json:"progress,omitempty"`
 	StartedAt   int64  `json:"startedat,omitempty"`
-	Status      string `json:"status,omitempty"`
-	Type        string `json:"type,omitempty"`
-	Worker      string `json:"worker,omitempty"`
+	Status      string `json:"status"`
+	Type        string `json:"type"`
+	WorkerName  string `json:"worker,omitempty"`
 }
 
 type TaskStatusStruct struct {
-	Progress int    `json:"progress,omitempty"`
-	Status   string `json:"status,omitempty"`
+	Progress int    `json:"progress"`
+	Status   string `json:"status"`
 }
 
 type TaskStruct struct {
 	CompletedAt  int64          `json:"completedat,omitempty"`
-	CreatedAt    int64          `json:"createdat,omitempty"`
+	CreatedAt    int64          `json:"createdat"`
 	Data         map[string]any `json:"data,omitempty"`
 	File         string         `json:"file,omitempty"`
-	Id           string         `json:"id,omitempty"`
+	Id           string         `json:"id"`
 	Progress     int            `json:"progress,omitempty"`
 	Requirements map[string]any `json:"requirements,omitempty"`
 	Result       map[string]any `json:"result,omitempty"`
 	StartedAt    int64          `json:"startedat,omitempty"`
-	Status       string         `json:"status,omitempty"`
-	Type         string         `json:"type,omitempty"`
-	Worker       string         `json:"worker,omitempty"`
+	Status       string         `json:"status"`
+	Type         string         `json:"type"`
+	WorkerName   string         `json:"worker,omitempty"`
 }
 
 /********** Konstanten **********/
@@ -56,6 +64,12 @@ type TaskStruct struct {
 var FILES_ROOT string
 var TASKS_JSON_PATH string
 var TASKS_JSON TasksJsonStruct
+
+const (
+	TASK_STATUS_COMPLETED  = "completed"
+	TASK_STATUS_INPROGRESS = "inprogress"
+	TASK_STATUS_OPEN       = "open"
+)
 
 /********** Hilfsfunktionen **********/
 
@@ -69,7 +83,7 @@ func (task TaskStruct) ForList() TaskListStruct {
 		StartedAt:   task.StartedAt,
 		Status:      task.Status,
 		Type:        task.Type,
-		Worker:      task.Worker,
+		WorkerName:  task.WorkerName,
 	}
 }
 
@@ -93,8 +107,9 @@ func LoadTasksJson() {
 	if _, err := os.Stat(TASKS_JSON_PATH); errors.Is(err, os.ErrNotExist) {
 		os.MkdirAll(filepath.Dir(TASKS_JSON_PATH), 0755)
 		TASKS_JSON = TasksJsonStruct{
-			Tasks:      []TaskStruct{},
-			Statistics: map[string]int{},
+			Tasks:            []TaskStruct{},
+			Statistics:       map[string]int{},
+			WorkerStatistics: map[string]int{},
 		}
 		SaveTasksJson(TASKS_JSON)
 	} else {
@@ -174,6 +189,7 @@ func Remove(responseWriter http.ResponseWriter, request *http.Request) {
 			filePath := path.Join([]string{FILES_ROOT, task.File}...)
 			os.RemoveAll(filePath)
 			TASKS_JSON.Tasks = append(TASKS_JSON.Tasks[:index], TASKS_JSON.Tasks[index+1:]...)
+			SaveTasksJson(TASKS_JSON)
 			return
 		}
 	}
@@ -209,9 +225,35 @@ func Status(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func Take(responseWriter http.ResponseWriter, request *http.Request) {
+	var takeRequest TakeRequest
+	err := json.NewDecoder(request.Body).Decode(&takeRequest)
+	if err != nil {
+		responseWriter.WriteHeader(400)
+		return
+	}
+	fmt.Println(takeRequest)
+	var firstMatchingTask *TaskStruct
+	for i := range TASKS_JSON.Tasks {
+		task := &TASKS_JSON.Tasks[i]
+		if task.Type == takeRequest.Type && task.Status == TASK_STATUS_OPEN {
+			firstMatchingTask = task
+			break
+		}
+	}
+	if firstMatchingTask != nil {
+		firstMatchingTask.Status = TASK_STATUS_INPROGRESS
+		worker := workers.NotifyAboutWorkingWorker(takeRequest.Worker, takeRequest.Type, firstMatchingTask.Id)
+		firstMatchingTask.WorkerName = worker.Name
+		SaveTasksJson(TASKS_JSON)
+		RespondWithJson(responseWriter, firstMatchingTask)
+	} else {
+		workers.NotifyAboutIdleWorker(takeRequest.Worker, takeRequest.Type)
+		responseWriter.WriteHeader(404)
+	}
 }
 
 func WorkerStatistics(responseWriter http.ResponseWriter, request *http.Request) {
+	RespondWithJson(responseWriter, TASKS_JSON.WorkerStatistics)
 }
 
 /********** HTTP Handler **********/
@@ -233,6 +275,6 @@ func Register(filesRoot string, tasksJsonPath string) {
 	http.HandleFunc("GET /api/tasks/result/{taskid}", Result)
 	http.HandleFunc("GET /api/tasks/statistics/", Statistics)
 	http.HandleFunc("GET /api/tasks/status/{taskid}", Status)
-	http.HandleFunc("POST /api/tasks/take", Take)
-	http.HandleFunc("GET /api/tasks/workerstatistics", WorkerStatistics)
+	http.HandleFunc("POST /api/tasks/take/", Take)
+	http.HandleFunc("GET /api/tasks/workerstatistics/", WorkerStatistics)
 }

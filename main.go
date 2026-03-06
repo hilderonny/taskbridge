@@ -29,7 +29,7 @@ func main() {
 
 	// HTTPS-Server starten, geht in Endlosschleife
 	server := &http.Server{
-		Addr:     ":3001",
+		Addr:     ":3000",
 		Handler:  nil,
 		ErrorLog: log.New(io.Discard, "", 0),
 	}

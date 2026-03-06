@@ -9,7 +9,7 @@ async function addTask(type, data, file, requirements) {
     const formData = new FormData()
     formData.append('json', JSON.stringify(body))
     if (file) formData.append('file', file)
-    const response = await fetch('/api/tasks/add', {
+    const response = await fetch('/api/tasks/add/', {
         method: 'POST',
         body: formData
     })
@@ -28,7 +28,7 @@ async function getTaskDetails(taskId) {
 // Retreive a list of all tasks
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#list-all-tasks
 async function getTaskList() {
-    const response = await fetch('/api/tasks/list')
+    const response = await fetch('/api/tasks/list/')
     const tasks = await response.json()
     return tasks
 }
@@ -44,7 +44,7 @@ async function getTaskResult(taskId) {
 // Retreive statistics of all task types
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#get-task-statistics
 async function getTaskStatistics() {
-    const response = await fetch('/api/tasks/statistics')
+    const response = await fetch('/api/tasks/statistics/')
     const statistics = await response.json()
     return statistics
 }
@@ -60,7 +60,7 @@ async function getTaskStatus(taskId) {
 // Retreive a list of all connected workers and their status
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#list-all-workers
 async function getWorkerList() {
-    const response = await fetch('/api/workers/list')
+    const response = await fetch('/api/workers/list/')
     const workers = await response.json()
     return workers
 }
@@ -68,7 +68,7 @@ async function getWorkerList() {
 // Retreive statistics about all workers
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#get-worker-statistics
 async function getWorkerStatistics() {
-    const response =  await fetch('/api/tasks/workerstatistics')
+    const response =  await fetch('/api/tasks/workerstatistics/')
     const statistics = await response.json()
     return statistics
 }

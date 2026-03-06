@@ -8,7 +8,6 @@ import (
 )
 
 type WorkerStruct struct {
-	Id         string
 	LastPingAt time.Time
 	Name       string
 	Status     string
@@ -17,6 +16,29 @@ type WorkerStruct struct {
 }
 
 var WORKERS []WorkerStruct = []WorkerStruct{}
+
+const (
+	WORKER_STATUS_IDLE    = "idle"
+	WORKER_STATUS_WORKING = "working"
+)
+
+func GetWorkerByNameAndTypeOrCreateIt(workerName string, workerType string) *WorkerStruct {
+	var workerReference *WorkerStruct
+	for _, worker := range WORKERS {
+		if worker.Name == workerName {
+			workerReference = &worker
+			break
+		}
+	}
+	if workerReference == nil {
+		workerReference = &WorkerStruct{
+			Name: workerName,
+			Type: workerType,
+		}
+		WORKERS = append(WORKERS, *workerReference)
+	}
+	return workerReference
+}
 
 func List(responseWriter http.ResponseWriter, request *http.Request) {
 	filteredWorkers := make([]map[string]string, len(WORKERS))
@@ -32,6 +54,20 @@ func List(responseWriter http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(responseWriter).Encode(filteredWorkers)
 }
 
+func NotifyAboutIdleWorker(workerName string, workerType string) {
+	worker := GetWorkerByNameAndTypeOrCreateIt(workerName, workerType)
+	worker.LastPingAt = time.Now()
+	worker.Status = WORKER_STATUS_IDLE
+}
+
+func NotifyAboutWorkingWorker(workerName string, workerType string, taskId string) *WorkerStruct {
+	worker := GetWorkerByNameAndTypeOrCreateIt(workerName, workerType)
+	worker.LastPingAt = time.Now()
+	worker.Status = WORKER_STATUS_WORKING
+	worker.TaskId = taskId
+	return worker
+}
+
 func Register() {
-	http.HandleFunc("GET /api/workers/list", List)
+	http.HandleFunc("GET /api/workers/list/", List)
 }
