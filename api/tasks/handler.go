@@ -266,6 +266,15 @@ func Restart(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func Result(responseWriter http.ResponseWriter, request *http.Request) {
+	taskId := request.PathValue("taskid")
+	task := GetTaskById(taskId)
+	if task == nil {
+		responseWriter.WriteHeader(404)
+		return
+	}
+	result := make(map[string]map[string]any)
+	result["result"] = task.Result
+	RespondWithJson(responseWriter, result)
 }
 
 func Statistics(responseWriter http.ResponseWriter, request *http.Request) {
