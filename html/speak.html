@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+
+            * { margin: 0; padding: 0; font-family: sans-serif; font-size: 12pt; color: #1e2f55; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; }
+            body { padding: 32px 16px 32px 32px; display: flex; flex-direction: column; }
+
+            h1 { font-size: 24pt; margin-bottom: 24px; }
+
+            .content { flex: 1; display: flex; flex-direction: row; overflow: auto; }
+            .content .input { flex: 1; border: 1px solid #888888; box-shadow: 0px 0px 3px 0px #888888 inset; padding: 4px; line-break: anywhere; }
+            .content .input::placeholder { color: #aaaaaa; }
+            .content .transfer { padding: 16px; display: flex; flex-direction: column; justify-content: center; }
+            .content .transfer h2 { font-weight: normal; margin: 16px 0 8px 0; }
+            .content .transfer .sourcelanguage { padding: 8px; width: 120px; }
+            .content .transfer select { padding: 8px; cursor: pointer; }
+            .content .transfer button { background: #f1f2f4; border: none; border-radius: 3px; padding: 8px; cursor: pointer; margin-top: 16px; }
+            .content .transfer button:hover { background-color: #d5d6d8; }
+            .content .output { flex: 1; border: 1px solid #dddddd; padding: 4px; line-break: anywhere; overflow: auto; }
+
+        </style>
+        <script type="module">
+
+            import TASKBRIDGE from './taskbridge.js'
+
+            var taskidtowaitfor = undefined
+            var targetdiv = document.querySelector(".content .output")
+
+            function statusCallback(taskStatus) {
+                targetdiv.innerText = `Waiting for result of task ${taskidtowaitfor} (${taskStatus.status}${taskStatus.progress ? " " + taskStatus.progress + "%" : ""}) ...`
+            }
+
+            async function completionCallback(taskResult) {
+                if (taskResult) {
+                    const audio = taskResult.audio
+                    targetdiv.innerText = "Playing audio ..."
+                    if (audio.length > 0) {
+                        const dataUri = "data:audio/mp3;base64," + audio
+                        const player = new Audio(dataUri)
+                        player.addEventListener("ended", () => {
+                            targetdiv.innerText = ""
+                        })
+                        await player.play()
+                    }
+                }
+                localStorage.removeItem("speak-input")
+                localStorage.removeItem("speak-language")
+                localStorage.removeItem("speak-voice")
+                localStorage.removeItem("speak-taskidtowaitfor")
+            }
+
+            async function speak() {
+
+                var input = document.querySelector(".content .input").value
+                var sourcetexts = input.split("\n")
+                var language = document.querySelector(".content .language").value
+                var voice = document.querySelector(".content .voice").value
+                const data = {
+                    language: language,
+                    voice: voice,
+                    texts: sourcetexts
+                }
+                var addResult = await TASKBRIDGE.addTask('speak', data)
+                taskidtowaitfor = addResult.id
+
+                localStorage.setItem("speak-input", input)
+                localStorage.setItem("speak-language", language)
+                localStorage.setItem("speak-voice", voice)
+                localStorage.setItem("speak-taskidtowaitfor", taskidtowaitfor)
+
+                TASKBRIDGE.waitForTaskCompletion(taskidtowaitfor, statusCallback, completionCallback)
+
+            }
+
+            var lastinput = localStorage.getItem("speak-input")
+            if (lastinput) document.querySelector(".content .input").value = lastinput
+            var lastlanguage = localStorage.getItem("speak-language")
+            if (lastlanguage) document.querySelector(".content .language").value = lastlanguage
+            var lastvoice = localStorage.getItem("speak-voice")
+            if (lastvoice) document.querySelector(".content .voice").value = lastvoice
+            var lasttaskidtowaitfor = localStorage.getItem("speak-taskidtowaitfor")
+            if (lasttaskidtowaitfor) {
+                TASKBRIDGE.waitForTaskCompletion(lasttaskidtowaitfor, statusCallback, completionCallback)
+            }
+
+            document.querySelector(".content .transfer .start").addEventListener("click", speak)
+
+        </script>
+    </head>
+    <body>
+
+        <h1>Speak</h1>
+
+        <div class="content">
+            <textarea class="input" placeholder="Please input the text to speak here ..."></textarea>
+            <div class="transfer">
+                <h2>Language</h2>
+                <select class="language">
+                    <option value="ar">ar</option>
+                    <option value="de" selected>de</option>
+                    <option value="en">en</option>
+                    <option value="ja">ja</option>
+                    <option value="ru">ru</option>
+                </select>
+                <h2>Voice</h2>
+                <select class="voice">
+                    <option value="KITT" selected>K.I.T.T.</option>
+                    <option value="MERKEL">Merkel</option>
+                    <option value="IRONMAN">Ironman</option>
+                    <option value="SCHOLZ">Scholz</option>
+                    <option value="SPONGEBOB">Spongebob</option>
+                    <option value="WILLIS">Willis</option>
+                </select>
+                <button class="start">Speak</button>
+            </div>
+            <div class="output" contenteditable></div>
+        </div>
+
+    </body>
+</html>

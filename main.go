@@ -32,5 +32,5 @@ func main() {
 		ErrorLog: log.New(io.Discard, "", 0),
 	}
 	fmt.Println("Taskbridge running at port 3000")
-	server.ListenAndServeTLS("server.crt", "server.key")
+	server.ListenAndServe()
 }

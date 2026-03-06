@@ -19,7 +19,7 @@ Docker
 docker build -t taskbridge .
 ```
 
-
+- Kein HTTPS, da die Worker aktuell damit nicht klar kommen.
 
 
 
