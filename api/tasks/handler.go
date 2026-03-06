@@ -16,6 +16,10 @@ import (
 
 /********** Strukturen **********/
 
+type CompleteRequest struct {
+	Result map[string]any `json:"result"`
+}
+
 type ProgressRequest struct {
 	Progress string `json:"progress"`
 }
@@ -26,9 +30,9 @@ type TakeRequest struct {
 }
 
 type TasksJsonStruct struct {
-	Tasks            []TaskStruct   `json:"tasks"`
-	Statistics       map[string]int `json:"statistics"`
-	WorkerStatistics map[string]int `json:"workerstatistics"`
+	Tasks            []TaskStruct              `json:"tasks"`
+	Statistics       map[string]int            `json:"statistics"`
+	WorkerStatistics map[string]map[string]int `json:"workerstatistics"`
 }
 
 type TaskListStruct struct {
@@ -107,13 +111,24 @@ func GetTaskById(taskId string) *TaskStruct {
 	return nil
 }
 
+func IncrementTaskTypeStatistic(taskType string) {
+	TASKS_JSON.Statistics[taskType]++
+}
+
+func IncrementWorkerStatistic(workerName string, taskType string) {
+	if TASKS_JSON.WorkerStatistics[workerName] == nil {
+		TASKS_JSON.WorkerStatistics[workerName] = make(map[string]int)
+	}
+	TASKS_JSON.WorkerStatistics[workerName][taskType]++
+}
+
 func LoadTasksJson() {
 	if _, err := os.Stat(TASKS_JSON_PATH); errors.Is(err, os.ErrNotExist) {
 		os.MkdirAll(filepath.Dir(TASKS_JSON_PATH), 0755)
 		TASKS_JSON = TasksJsonStruct{
 			Tasks:            []TaskStruct{},
 			Statistics:       map[string]int{},
-			WorkerStatistics: map[string]int{},
+			WorkerStatistics: map[string]map[string]int{},
 		}
 		SaveTasksJson(TASKS_JSON)
 	} else {
@@ -160,6 +175,24 @@ func Add(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func Complete(responseWriter http.ResponseWriter, request *http.Request) {
+	var completeRequest CompleteRequest
+	err := json.NewDecoder(request.Body).Decode(&completeRequest)
+	if err != nil {
+		responseWriter.WriteHeader(400)
+		return
+	}
+	taskId := request.PathValue("taskid")
+	task := GetTaskById(taskId)
+	if task == nil {
+		responseWriter.WriteHeader(404)
+		return
+	}
+	task.Result = completeRequest.Result
+	task.CompletedAt = time.Now().UTC().UnixMilli()
+	task.Status = TASK_STATUS_COMPLETED
+	IncrementTaskTypeStatistic(task.Type)
+	IncrementWorkerStatistic(task.WorkerName, task.Type)
+	SaveTasksJson(TASKS_JSON)
 }
 
 func Details(responseWriter http.ResponseWriter, request *http.Request) {
