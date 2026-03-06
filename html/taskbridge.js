@@ -20,7 +20,7 @@ async function addTask(type, data, file, requirements) {
 // Returns complete task details
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#get-all-details-of-a-task
 async function getTaskDetails(taskId) {
-    const response = await fetch(`/api/tasks/details/${taskId}`)
+    const response = await fetch(`/api/tasks/details/${taskId}/`)
     const details = await response.json()
     return details
 }
@@ -36,7 +36,7 @@ async function getTaskList() {
 // Retreive the result of a task
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#get-the-results-of-a-completed-task
 async function getTaskResult(taskId) {
-    const response = await fetch(`/api/tasks/result/${taskId}`)
+    const response = await fetch(`/api/tasks/result/${taskId}/`)
     const json = await response.json()
     return json.result
 }
@@ -52,7 +52,7 @@ async function getTaskStatistics() {
 // Retreive the status and progress for a task
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#get-status-information-about-a-task
 async function getTaskStatus(taskId) {
-    const response = await fetch(`/api/tasks/status/${taskId}`)
+    const response = await fetch(`/api/tasks/status/${taskId}/`)
     const status = response.status !== 404 ? await response.json() : undefined
     return status
 }
@@ -76,13 +76,13 @@ async function getWorkerStatistics() {
 // Removes a task
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#remove-a-task
 async function removeTask(taskId) {
-    await fetch(`/api/tasks/remove/${taskId}`, { method: 'DELETE' })
+    await fetch(`/api/tasks/remove/${taskId}/`, { method: 'DELETE' })
 }
 
 // Restarts a task
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#restart-a-task
 async function restartTask(taskId) {
-    await fetch(`/api/tasks/restart/${taskId}`)
+    await fetch(`/api/tasks/restart/${taskId}/`)
 }
 
 // Wait for a task completion and reports the results and the status

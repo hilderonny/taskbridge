@@ -4,17 +4,21 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"hilderonny/taskbridge/api/workers"
 	"io"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
 /********** Strukturen **********/
+
+type ProgressRequest struct {
+	Progress string `json:"progress"`
+}
 
 type TakeRequest struct {
 	Type   string `json:"type"`
@@ -169,6 +173,12 @@ func Details(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func File(responseWriter http.ResponseWriter, request *http.Request) {
+	taskId := request.PathValue("taskid")
+	task := GetTaskById(taskId)
+	filePath := path.Join([]string{FILES_ROOT, task.File}...)
+	responseWriter.Header().Set("Content-Disposition", "attachment; filename=\""+task.File+"\"")
+	responseWriter.Header().Set("Content-Type", "application/octet-stream")
+	http.ServeFile(responseWriter, request, filePath)
 }
 
 func List(responseWriter http.ResponseWriter, request *http.Request) {
@@ -180,6 +190,21 @@ func List(responseWriter http.ResponseWriter, request *http.Request) {
 }
 
 func Progress(responseWriter http.ResponseWriter, request *http.Request) {
+	var progressRequest ProgressRequest
+	err := json.NewDecoder(request.Body).Decode(&progressRequest)
+	if err != nil {
+		responseWriter.WriteHeader(400)
+		return
+	}
+	taskId := request.PathValue("taskid")
+	task := GetTaskById(taskId)
+	if task == nil {
+		responseWriter.WriteHeader(404)
+		return
+	}
+	task.Progress, _ = strconv.Atoi(progressRequest.Progress)
+	SaveTasksJson(TASKS_JSON)
+	responseWriter.WriteHeader(200)
 }
 
 func Remove(responseWriter http.ResponseWriter, request *http.Request) {
@@ -231,7 +256,6 @@ func Take(responseWriter http.ResponseWriter, request *http.Request) {
 		responseWriter.WriteHeader(400)
 		return
 	}
-	fmt.Println(takeRequest)
 	var firstMatchingTask *TaskStruct
 	for i := range TASKS_JSON.Tasks {
 		task := &TASKS_JSON.Tasks[i]
@@ -265,16 +289,16 @@ func Register(filesRoot string, tasksJsonPath string) {
 	LoadTasksJson()
 	// API Routen registrieren
 	http.HandleFunc("POST /api/tasks/add/", Add)
-	http.HandleFunc("POST /api/tasks/complete/{taskid}", Complete)
-	http.HandleFunc("GET /api/tasks/details/{taskid}", Details)
-	http.HandleFunc("GET /api/tasks/file/{taskid}", File)
+	http.HandleFunc("POST /api/tasks/complete/{taskid}/", Complete)
+	http.HandleFunc("GET /api/tasks/details/{taskid}/", Details)
+	http.HandleFunc("GET /api/tasks/file/{taskid}/", File)
 	http.HandleFunc("GET /api/tasks/list/", List)
-	http.HandleFunc("POST /api/tasks/progress/{taskid}", Progress)
-	http.HandleFunc("DELETE /api/tasks/remove/{taskid}", Remove)
-	http.HandleFunc("GET /api/tasks/restart/{taskid}", Restart)
-	http.HandleFunc("GET /api/tasks/result/{taskid}", Result)
+	http.HandleFunc("POST /api/tasks/progress/{taskid}/", Progress)
+	http.HandleFunc("DELETE /api/tasks/remove/{taskid}/", Remove)
+	http.HandleFunc("GET /api/tasks/restart/{taskid}/", Restart)
+	http.HandleFunc("GET /api/tasks/result/{taskid}/", Result)
 	http.HandleFunc("GET /api/tasks/statistics/", Statistics)
-	http.HandleFunc("GET /api/tasks/status/{taskid}", Status)
+	http.HandleFunc("GET /api/tasks/status/{taskid}/", Status)
 	http.HandleFunc("POST /api/tasks/take/", Take)
 	http.HandleFunc("GET /api/tasks/workerstatistics/", WorkerStatistics)
 }
