@@ -10,13 +10,22 @@ go init
 
 ```sh
 go build -o taskbridge .
-PORT=3000 ./taskbridge
+PORT=3000 PERSISTENCE=ONDISK ./taskbridge
 ```
 
 ## Docker erstellen
 
 ```sh
 docker build -t taskbridge .
+```
+
+## Docker starten
+
+```sh
+# Persistence on disk at ./data/tasks.json, usefule for keeping tasks over restarts
+docker run --name taskbridge-ondisk -e PORT=3000 -e PERSISTENCE=ONDISK -p 3000:3000 taskbridge
+# Persistence in memory, useful for very many tasks to keep up performance without disk writing
+docker run --name taskbridge-inmemory -e PORT=3000 -e PERSISTENCE=INMEMORY -p 3000:3000 taskbridge
 ```
 
 - Kein HTTPS, da die Worker aktuell damit nicht klar kommen.

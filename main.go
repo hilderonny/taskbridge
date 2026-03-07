@@ -79,15 +79,18 @@ type WorkerStruct struct {
 /********** Globale Variablen **********/
 
 var (
-	PORT       string
-	TASKS_JSON TasksJsonStruct
-	WORKERS    []WorkerStruct = []WorkerStruct{}
+	PERSISTENCE string
+	PORT        string
+	TASKS_JSON  TasksJsonStruct
+	WORKERS     []WorkerStruct = []WorkerStruct{}
 )
 
 /********** Konstanten **********/
 
 const (
 	FILES_ROOT             = "./data/files"
+	PERSISTENCE_ONDISK     = "ONDISK"
+	PERSISTENCE_INMEMORY   = "INMEMORY"
 	TASK_STATUS_COMPLETED  = "completed"
 	TASK_STATUS_INPROGRESS = "inprogress"
 	TASK_STATUS_OPEN       = "open"
@@ -160,17 +163,25 @@ func IncrementWorkerStatistic(workerName string, taskType string) {
 }
 
 func LoadTasksJson() {
-	if _, err := os.Stat(TASKS_JSON_PATH); errors.Is(err, os.ErrNotExist) {
-		os.MkdirAll(filepath.Dir(TASKS_JSON_PATH), 0755)
+	if PERSISTENCE == PERSISTENCE_ONDISK {
+		if _, err := os.Stat(TASKS_JSON_PATH); errors.Is(err, os.ErrNotExist) {
+			os.MkdirAll(filepath.Dir(TASKS_JSON_PATH), 0755)
+			TASKS_JSON = TasksJsonStruct{
+				Tasks:            []TaskStruct{},
+				Statistics:       map[string]int{},
+				WorkerStatistics: map[string]map[string]int{},
+			}
+			SaveTasksJson(TASKS_JSON)
+		} else {
+			fileContent, _ := os.ReadFile(TASKS_JSON_PATH)
+			json.Unmarshal(fileContent, &TASKS_JSON)
+		}
+	} else {
 		TASKS_JSON = TasksJsonStruct{
 			Tasks:            []TaskStruct{},
 			Statistics:       map[string]int{},
 			WorkerStatistics: map[string]map[string]int{},
 		}
-		SaveTasksJson(TASKS_JSON)
-	} else {
-		fileContent, _ := os.ReadFile(TASKS_JSON_PATH)
-		json.Unmarshal(fileContent, &TASKS_JSON)
 	}
 }
 
@@ -194,8 +205,10 @@ func RespondWithJson(responseWriter http.ResponseWriter, dataToSend any) {
 }
 
 func SaveTasksJson(tasksJson TasksJsonStruct) {
-	jsonContent, _ := json.MarshalIndent(tasksJson, "", "\t")
-	os.WriteFile(TASKS_JSON_PATH, jsonContent, 0644)
+	if PERSISTENCE == PERSISTENCE_ONDISK {
+		jsonContent, _ := json.MarshalIndent(tasksJson, "", "\t")
+		os.WriteFile(TASKS_JSON_PATH, jsonContent, 0644)
+	}
 }
 
 /********** API - Funktionen **********/
@@ -398,6 +411,12 @@ func main() {
 	PORT = os.Getenv("PORT")
 	if PORT == "" {
 		fmt.Println("Environment variable PORT is missing!")
+		return
+	}
+	// Persistenz in Datei noder in Speicher
+	PERSISTENCE = os.Getenv("PERSISTENCE")
+	if PERSISTENCE != PERSISTENCE_ONDISK && PERSISTENCE != PERSISTENCE_INMEMORY {
+		fmt.Println("Environment variable PERSISTENCE is missing or not of 'ONDISK' or 'INMEMORY'!")
 		return
 	}
 

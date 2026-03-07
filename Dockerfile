@@ -2,7 +2,6 @@
 FROM golang:tip-alpine3.23 AS build
 WORKDIR /src
 COPY ./go.mod .
-COPY ./api ./api
 RUN go mod download
 COPY ./main.go .
 RUN go build -trimpath -ldflags="-s -w" -o /out/server .
@@ -12,9 +11,9 @@ RUN go build -trimpath -ldflags="-s -w" -o /out/server .
 FROM scratch
 WORKDIR /app
 COPY --from=build /out/server /app/server
-COPY ./server.crt /app/
-COPY ./server.key /app/
+COPY ./html /app/html
 ENV GIN_MODE=release
 ENV PORT=3000
+ENV PERSISTENCE=ONDISK
 EXPOSE 3000
 ENTRYPOINT ["/app/server"]
