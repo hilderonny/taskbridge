@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; }
+            body { padding: 32px 16px 32px 32px; display: flex; flex-direction: column; font-family: sans-serif; font-size: 12pt; color: #1e2f55; }
+
+            h1 { font-size: 24pt; margin-bottom: 24px; }
+            h2 { font-size: 18pt; font-weight: normal; margin-bottom: 12px; }
+
+            .content { display: flex; flex-direction: row; flex: 1; overflow: auto; }
+
+            .leftcolumn { flex: 1; display: flex; flex-direction: column; margin-right: 16px; }
+            .leftcolumn input { border: 1px dashed #888888; margin: 0 auto; padding: 40px; border-radius: 5px; background: #fafafa; }
+            .leftcolumn select { padding: 8px; cursor: pointer; margin: 16px auto 0 auto; }
+            .leftcolumn button { background: #f1f2f4; border: none; border-radius: 3px; padding: 8px; cursor: pointer; margin: 16px auto; }
+            .leftcolumn button:hover { background-color: #d5d6d8; }
+            .leftcolumn audio { display: none; width: 100%; }
+            .leftcolumn video { display: none; max-width: 100%; max-height: 600px; flex: 1; }
+
+            .rightcolumn { flex: 1; display: flex; flex-direction: column; margin-left: 16px; overflow: auto; }
+            .rightcolumn .result { flex: 1; border: 1px solid #dddddd; padding: 4px; overflow: auto; }
+            .rightcolumn .result table { border-spacing: 0; }
+            .rightcolumn table tr { cursor: pointer; }
+            .rightcolumn table tr.selected { background-color: lightblue; }
+            .rightcolumn .time { white-space: nowrap; color: #999; padding-right: 16px; position: relative; }
+            .rightcolumn .time .start { flex: 1; margin-bottom: 16px; }
+            .rightcolumn .time .end { position: absolute; bottom: 0; }
+            .rightcolumn td, .rightcolumn th { vertical-align: top; border-bottom: 1px solid #ccc; }
+
+
+        </style>
+        <script src="xlsx.full.min.js"></script>
+        <script type="module">
+
+            import TASKBRIDGE from './taskbridge.js'
+
+            var taskidtowaitfor = undefined
+            const fileInput = document.querySelector(".file")
+            const videoControl = document.querySelector("video")
+            const audioControl = document.querySelector("audio")
+            let currentControl
+            const resultTable = document.querySelector(".result table")
+
+            function statusCallback(taskStatus) {
+                resultTable.innerText = `Waiting for result of task ${taskidtowaitfor} (${taskStatus.status}${taskStatus.progress ? " " + taskStatus.progress + "%" : ""}) ...`
+            }
+
+            async function writeDown() {
+                const targetLanguage = document.querySelector(".leftcolumn .targetlanguage").value
+                var file = fileInput.files[0]
+                resultTable.innerText = `Uploading file ${file.name} ...`
+                const transcribeAddResult = await TASKBRIDGE.addTask('transcribe', undefined, file)
+                taskidtowaitfor = transcribeAddResult.id
+                TASKBRIDGE.waitForTaskCompletion(taskidtowaitfor, statusCallback, async (transcribeTaskResult) => {
+                    if (transcribeTaskResult) {
+                        const data = {
+                            sourcelanguage: transcribeTaskResult.language,
+                            targetlanguage: targetLanguage,
+                            texts: transcribeTaskResult.texts.map(t => t.text)
+                        }
+                        const translateAddResult = await TASKBRIDGE.addTask('translate', data)
+                        taskidtowaitfor = translateAddResult.id
+                        TASKBRIDGE.waitForTaskCompletion(taskidtowaitfor, statusCallback, (translateTaskResult) => {
+                            if (translateTaskResult) {
+                                const texts = transcribeTaskResult.texts
+                                for (let i = 0; i < texts.length; i++) {
+                                    texts[i].translated = translateTaskResult.texts[i].text
+                                }
+                                showResult(texts)
+                            }
+                        })
+                    }
+                })
+            }
+
+            function handleTimeUpdate(event) {
+                const time = event.target.currentTime
+                resultTable.querySelectorAll("tr").forEach((tr) => {
+                    tr.classList.remove("selected")
+                    if (tr.startTime <= time && tr.endTime > time) {
+                        tr.classList.add("selected")
+                    }
+                })
+            }
+
+            function formatTime(seconds) {
+                const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+                const millis = Math.floor((seconds % 1) * 1000).toString().padStart(3, '0');
+                return `${hours}:${minutes}:${secs}.${millis}`;
+            }
+
+            function showResult(texts) {
+                resultTable.innerHTML = `<tr><th>Time</th><th>Transcription</th><th>Translation</th></tr>`
+                for (const text of texts) {
+                    const row = document.createElement("tr")
+                    row.startTime = text.start
+                    row.endTime = text.end
+                    row.addEventListener("click", () => {
+                        currentControl.currentTime = text.start
+                        currentControl.play()
+                    })
+                    const timeCell = document.createElement("td")
+                    timeCell.classList.add("time")
+                    timeCell.innerHTML = `<p class="start">${formatTime(text.start)}</p>`
+                    row.appendChild(timeCell)
+                    const textCell = document.createElement("td")
+                    textCell.setAttribute("contenteditable", true)
+                    textCell.classList.add("text")
+                    textCell.innerHTML = text.text
+                    row.appendChild(textCell)
+                    if (text.translated) {
+                        const translatedCell = document.createElement("td")
+                        translatedCell.setAttribute("contenteditable", true)
+                        translatedCell.classList.add("text")
+                        translatedCell.innerHTML = text.translated
+                        row.appendChild(translatedCell)
+                    }
+                    resultTable.appendChild(row)
+                }
+            }
+
+            document.querySelector(".writedown").addEventListener("click", writeDown)
+
+            fileInput.addEventListener("change", () => {
+                const file = fileInput.files[0]
+                const isAudio = file.type.startsWith("audio")
+                const media = URL.createObjectURL(file)
+                if (currentControl) {
+                    currentControl.pause()
+                }
+                if (isAudio) {
+                    audioControl.src = media
+                    audioControl.style.display = "initial"
+                    videoControl.style.display = "none"
+                    currentControl = audioControl
+                } else {
+                    videoControl.src = media
+                    audioControl.style.display = "none"
+                    videoControl.style.display = "initial"
+                    currentControl = videoControl
+                }
+                resultTable.innerText = ""
+            })
+
+            audioControl.addEventListener("timeupdate", handleTimeUpdate)
+            videoControl.addEventListener("timeupdate", handleTimeUpdate)
+
+            document.querySelector(".download").addEventListener("click", () => {
+                const wb = XLSX.utils.table_to_book(resultTable);
+                XLSX.writeFile(wb, "transcription.xlsx");
+            })
+
+        </script>
+    </head>
+    <body>
+
+        <h1>Write down</h1>
+
+        <div class="content">
+
+            <div class="leftcolumn">
+                <h2>Source</h2>
+
+                <input type="file" class="file" accept="audio/*,video/*" />
+
+                <select class="targetlanguage">
+                    <option value="ar">ar</option>
+                    <option value="de" selected>de</option>
+                    <option value="en">en</option>
+                    <option value="ja">ja</option>
+                    <option value="ru">ru</option>
+                    <option value="zh">zh</option>
+                </select>
+
+                <button class="writedown">Write down</button>
+
+                <video controls></video>
+
+                <audio controls></audio>
+            </div>
+
+            <div class="rightcolumn">
+                <h2>Result</h2>
+
+                <div class="result">
+                    <table></table>
+                </div>
+
+                <button class="download">Download</button>
+            </div>
+
+        </div>
+
+    </body>
+</html>

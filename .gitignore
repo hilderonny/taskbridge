@@ -1,7 +1,3 @@
-node_modules
-upload
-tasks.json
-apidoc
-coverage
-testupload
-testwebroot
+.DS_Store
+__debug_bin*
+data

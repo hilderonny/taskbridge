@@ -5,18 +5,26 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Mit Persistenz",
+            "type": "go",
             "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\server.js",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
             "env": {
-                "PORT": "8080",
-                "FILEPATH": "./upload",
-                "WEBROOT": "../taskbridge-webui"
-            }
-        }
+                "PORT": "3000",
+                "PERSISTENCE": "ONDISK",
+            },
+        },
+        {
+            "name": "In Memory",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "env": {
+                "PORT": "3000",
+                "PERSISTENCE": "INMEMORY",
+            },
+        },
     ]
 }
