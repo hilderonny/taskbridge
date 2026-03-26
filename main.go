@@ -213,6 +213,25 @@ func SaveTasksJson(tasksJson TasksJsonStruct) {
 	}
 }
 
+// Globale CORS-Middleware für alle Routen
+func WithCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Für Entwicklung erstmal alles erlauben
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Content-Type")
+
+		// Preflight-Requests direkt beantworten
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 /********** API - Funktionen **********/
 
 func Api_Tasks_Add(responseWriter http.ResponseWriter, request *http.Request) {
@@ -443,10 +462,13 @@ func main() {
 	// Statische HTML Seiten ausliefern, wird reingemountet
 	http.Handle("/", http.FileServer(http.Dir(WEB_ROOT)))
 
+	// Gesamten DefaultMux mit CORS wrappen
+	handler := WithCORS(http.DefaultServeMux)
+
 	// HTTPS-Server starten, geht in Endlosschleife
 	server := &http.Server{
 		Addr:     ":" + PORT,
-		Handler:  nil,
+		Handler:  handler,
 		ErrorLog: log.New(io.Discard, "", 0),
 	}
 	fmt.Println("Taskbridge running at port " + PORT)
