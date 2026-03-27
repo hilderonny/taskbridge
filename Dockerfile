@@ -12,6 +12,8 @@ FROM scratch
 WORKDIR /app
 COPY --from=build /out/server /app/server
 COPY ./html /app/html
+COPY ./server.crt /app/server.crt
+COPY ./server.key /app/server.key
 ENV GIN_MODE=release
 ENV PORT=3000
 ENV PERSISTENCE=ONDISK

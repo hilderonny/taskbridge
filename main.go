@@ -486,10 +486,14 @@ func main() {
 	// HTTP-Server in paralellelm thread starten
 	go func() {
 		fmt.Println("Taskbridge HTTP running at port " + PORT)
-		httpServer.ListenAndServe()
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTP-Server Fehler: %v", err)
+		}
 	}()
 
 	// HTTPS-Server starten, geht in Endlosschleife
-	fmt.Println("Taskbridge HTTPS running at port " + HTTPSPORT)
 	httpsServer.ListenAndServeTLS("server.crt", "server.key")
+	if err := httpsServer.ListenAndServeTLS("server.crt", "server.key"); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("HTTPS-Server Fehler: %v", err)
+	}
 }
