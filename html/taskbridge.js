@@ -81,7 +81,7 @@ async function getWorkerStatistics() {
 // Removes a task
 // https://github.com/hilderonny/taskbridge/blob/main/doc/API.md#remove-a-task
 async function removeTask(taskId) {
-    await fetch(getAbsoluteUrl(`/api/tasks/remove/${taskId}/`, { method: 'DELETE' }))
+    await fetch(getAbsoluteUrl(`/api/tasks/remove/${taskId}/`), { method: 'DELETE' })
 }
 
 // Restarts a task

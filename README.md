@@ -12,10 +12,10 @@ Es wird derzeit kein HTTPS unterstützt, da die existierenden Worker mit den sel
 
 ```sh
 # Aufgaben und Statistiken auf Festplatte unter ./data/tasks.json speichern, diese bleiben über einen Neustart hinweg erhalten
-docker run --name taskbridge-ondisk -e HTTPSPORT=3443 -e PORT=3000 -e PERSISTENCE=ONDISK -p 42443:3443 -p 42000:3000 hilderonny2024/taskbridge:2.2.0
+docker run --name taskbridge-ondisk -e HTTPSPORT=3443 -e PORT=3000 -e PERSISTENCE=ONDISK -p 42443:3443 -p 42000:3000 hilderonny2024/taskbridge:2.2.1
 
 # Aufgaben und Statistiken nur im Speicher halten, erhöhte Performance durch fehlende Festplattenzugriffe
-docker run --name taskbridge-inmemory -e HTTPSPORT=3443 -e PORT=3000 -e PERSISTENCE=INMEMORY -p 42443:3443 -p 42000:3000 hilderonny2024/taskbridge:2.2.0
+docker run --name taskbridge-inmemory -e HTTPSPORT=3443 -e PORT=3000 -e PERSISTENCE=INMEMORY -p 42443:3443 -p 42000:3000 hilderonny2024/taskbridge:2.2.1
 ```
 
 Die TaskBridge (sowohl Weboberfläche als auch API) ist anschließend an den Ports `42000` (HTTP) und `42443` (HTTPS) erreichbar.
@@ -710,6 +710,6 @@ Zum lokalen Testen existieren für Visual Studio Code die Startprofile **Mit Per
 
 ```sh
 docker login
-docker build -t hilderonny2024/taskbridge:2.2.0 .
-docker push hilderonny2024/taskbridge:2.2.0
+docker build -t hilderonny2024/taskbridge:2.2.1 .
+docker push hilderonny2024/taskbridge:2.2.1
 ```
