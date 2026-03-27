@@ -81,6 +81,7 @@ type WorkerStruct struct {
 /********** Globale Variablen **********/
 
 var (
+	HTTPSPORT   string
 	PERSISTENCE string
 	PORT        string
 	TASKS_JSON  TasksJsonStruct
@@ -434,6 +435,11 @@ func main() {
 		fmt.Println("Environment variable PORT is missing!")
 		return
 	}
+	HTTPSPORT = os.Getenv("HTTPSPORT")
+	if HTTPSPORT == "" {
+		fmt.Println("Environment variable HTTPSPORT is missing!")
+		return
+	}
 	// Persistenz in Datei noder in Speicher
 	PERSISTENCE = os.Getenv("PERSISTENCE")
 	if PERSISTENCE != PERSISTENCE_ONDISK && PERSISTENCE != PERSISTENCE_INMEMORY {
@@ -465,12 +471,25 @@ func main() {
 	// Gesamten DefaultMux mit CORS wrappen
 	handler := WithCORS(http.DefaultServeMux)
 
-	// HTTPS-Server starten, geht in Endlosschleife
-	server := &http.Server{
+	// Server für HTTP und HTTPS vorbereiten
+	httpServer := &http.Server{
 		Addr:     ":" + PORT,
 		Handler:  handler,
 		ErrorLog: log.New(io.Discard, "", 0),
 	}
-	fmt.Println("Taskbridge running at port " + PORT)
-	server.ListenAndServe()
+	httpsServer := &http.Server{
+		Addr:     ":" + HTTPSPORT,
+		Handler:  handler,
+		ErrorLog: log.New(io.Discard, "", 0),
+	}
+
+	// HTTP-Server in paralellelm thread starten
+	go func() {
+		fmt.Println("Taskbridge HTTP running at port " + PORT)
+		httpServer.ListenAndServe()
+	}()
+
+	// HTTPS-Server starten, geht in Endlosschleife
+	fmt.Println("Taskbridge HTTPS running at port " + HTTPSPORT)
+	httpsServer.ListenAndServeTLS("server.crt", "server.key")
 }

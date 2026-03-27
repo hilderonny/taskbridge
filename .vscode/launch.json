@@ -11,6 +11,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}",
             "env": {
+                "HTTPSPORT": "3443",
                 "PORT": "3000",
                 "PERSISTENCE": "ONDISK",
             },
@@ -22,6 +23,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}",
             "env": {
+                "HTTPSPORT": "3443",
                 "PORT": "3000",
                 "PERSISTENCE": "INMEMORY",
             },
