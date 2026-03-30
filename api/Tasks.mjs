@@ -151,7 +151,18 @@ export default {
     Take(request, response) {
         const taskType = request.body.type
         const workerName = request.body.worker
-        const firstMatchingTask = Helper.TASKS_JSON.tasks.find(task => task.status === TASK_STATUS_OPEN && task.type === taskType)
+        const firstMatchingTask = Helper.TASKS_JSON.tasks.find(task => {
+            if (task.status !== TASK_STATUS_OPEN || task.type !== taskType) return false
+            const abilities = request.body.abilities
+            if (task.requirements) {
+                if (!abilities) return false
+                for (const [ key, value ] of Object.entries(task.requirements)) {
+                    const ability = abilities[key]
+                    if (!ability || ability !== value) return false
+                }
+            }
+            return true
+        })
         Helper.NotifyAboutWorker(workerName, taskType, firstMatchingTask ? WORKER_STATUS_WORKING : WORKER_STATUS_IDLE, firstMatchingTask?.id)
         if (!firstMatchingTask) {
             response.sendStatus(404)
