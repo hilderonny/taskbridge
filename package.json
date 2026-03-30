@@ -1,0 +1,11 @@
+{
+  "name": "taskbridge",
+  "main": "server.mjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "http": "^0.0.1-security",
+    "https": "^1.0.0",
+    "multer": "^2.1.1"
+  }
+}

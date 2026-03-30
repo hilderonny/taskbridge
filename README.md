@@ -12,24 +12,26 @@ Es wird derzeit kein HTTPS unterstützt, da die existierenden Worker mit den sel
 
 ```sh
 # Aufgaben und Statistiken auf Festplatte unter ./data/tasks.json speichern, diese bleiben über einen Neustart hinweg erhalten
-docker run --name taskbridge-ondisk -e HTTPSPORT=3443 -e PORT=3000 -e PERSISTENCE=ONDISK -p 42443:3443 -p 42000:3000 hilderonny2024/taskbridge:2.2.1
+docker run -d --name taskbridge-ondisk -e HTTPSPORT=3443 -e PORT=3000 -e PERSISTENCE=ONDISK -p 42443:3443 -p 42000:3000 hilderonny2024/taskbridge:3.0.0
 
 # Aufgaben und Statistiken nur im Speicher halten, erhöhte Performance durch fehlende Festplattenzugriffe
-docker run --name taskbridge-inmemory -e HTTPSPORT=3443 -e PORT=3000 -e PERSISTENCE=INMEMORY -p 42443:3443 -p 42000:3000 hilderonny2024/taskbridge:2.2.1
+docker run -d --name taskbridge-inmemory -e HTTPSPORT=3443 -e PORT=3000 -e PERSISTENCE=INMEMORY -p 42443:3443 -p 42000:3000 hilderonny2024/taskbridge:3.0.0
 ```
 
 Die TaskBridge (sowohl Weboberfläche als auch API) ist anschließend an den Ports `42000` (HTTP) und `42443` (HTTPS) erreichbar.
 
 ## Als Hintergrunddienst auf Linux-Rechner laufen lassen
 
+- NodeJS installieren, siehe https://nodejs.org/en/download/
 - Datei `/etc/systemd/system/taskbridge.service` mit folgendem Inhalt erstellen
+- `npm ci` ausführen
 
 ```
 [Unit]
 Description=taskbridge
 
 [Service]
-ExecStart=/usr/bin/go /github/hilderonny/taskbridge/main.go
+ExecStart=/usr/bin/node /github/hilderonny/taskbridge/server.mjs
 WorkingDirectory=/github/hilderonny/taskbridge
 Restart=always
 RestartSec=10
@@ -698,10 +700,10 @@ Der `json` Teil enthält die gesamte Chat-Historie und endet üblicherweise mit 
 
 - Visual Studio Code einrichten
 - Repository mit GIT klonen
-- GO installieren
+- NodeJS installieren
 
 ```
-go init
+npm ci
 ```
 
 Zum lokalen Testen existieren für Visual Studio Code die Startprofile **Mit Persistenz** (speichert die Aufgaben über Neustarts hinweg auf Festplatte) und **In Memory** (Aufgaben werden nur im Speicher gehalten, kein Festplattenzugriff).
@@ -710,6 +712,6 @@ Zum lokalen Testen existieren für Visual Studio Code die Startprofile **Mit Per
 
 ```sh
 docker login
-docker build -t hilderonny2024/taskbridge:2.2.1 .
-docker push hilderonny2024/taskbridge:2.2.1
+docker build -t hilderonny2024/taskbridge:3.0.0 .
+docker push hilderonny2024/taskbridge:3.0.0
 ```

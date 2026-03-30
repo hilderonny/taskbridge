@@ -1,21 +1,24 @@
-# Anwendung in normaler Distro kompilieren
-FROM golang:tip-alpine3.23 AS build
-WORKDIR /src
-COPY ./go.mod .
-RUN go mod download
-COPY ./main.go .
-RUN go build -trimpath -ldflags="-s -w" -o /out/server .
+FROM node:25.8.1-alpine3.23
 
-# Minimalistische Runtime erstellen
-# Default-Port ist 3000
-FROM scratch
 WORKDIR /app
-COPY --from=build /out/server /app/server
-COPY ./html /app/html
-COPY ./server.crt /app/server.crt
-COPY ./server.key /app/server.key
-ENV GIN_MODE=release
+
+COPY ./api ./api/
+COPY ./html ./html/
+COPY ./package*.json ./
+COPY ./Helper.mjs ./
+COPY ./server.crt ./
+COPY ./server.key ./
+COPY ./server.mjs ./
+
+RUN --mount=type=cache,target=/root/.npm,sharing=locked \
+    npm ci --no-audit --no-fund && \
+    npm cache clean --force
+
 ENV PORT=3000
+ENV HTTPSPORT=3443
 ENV PERSISTENCE=ONDISK
+
 EXPOSE 3000
-ENTRYPOINT ["/app/server"]
+EXPOSE 3443
+
+CMD ["node", "./server.mjs"]
