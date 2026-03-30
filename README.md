@@ -166,6 +166,8 @@ Der Request muss als `MultiPartForm` gesendet werden und muss ein Feld `json` mi
 
 Falls die Daten zu groß sind, können sie anstelle des `data` Attributes auch direkt im MultiPartForm als Eigenschaft `file` als Datei angehangen werden.
 
+Das Attribut `requirements` ist optional und gibt an, welche Fähigkeiten (`abilities`) ein Worker haben muss, um eine solche Aufgabe zugewiesen zu bekommen.
+
 #### Response
 
 ```json
@@ -180,9 +182,16 @@ Falls die Daten zu groß sind, können sie anstelle des `data` Attributes auch d
 
 ```json
 {
-    "type": "translate"
+    "type": "translate",
+    "worker": "Name of worker",
+    "abilities": {
+        "sourcelanguage": "en",
+        "targetlanguage": "de"
+    }
 }
 ```
+
+`abilities` ist optional gibt die Fähigkeiten des Workers an. Wenn eine Aufgabe `requirements` hat, bekommt der Worker nur dann die Aufgabe, wenn seine `abilities` die `requirements` der Aufgabe umfassen.
 
 #### Response
 
