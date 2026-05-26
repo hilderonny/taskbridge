@@ -46,6 +46,14 @@ export default {
             } else {
                 Helper.TASKS_JSON.statistics[task.type] = 1
             }
+            if (!Helper.TASKS_JSON.workerstatistics[task.worker]) {
+                Helper.TASKS_JSON.workerstatistics[task.worker] = {}
+            }
+            if (Helper.TASKS_JSON.workerstatistics[task.worker][task.type]) {
+                Helper.TASKS_JSON.workerstatistics[task.worker][task.type] += 1
+            } else {
+                Helper.TASKS_JSON.workerstatistics[task.worker][task.type] = 1
+            }
             Helper.SaveTasksJson()
             response.sendStatus(200)
         }

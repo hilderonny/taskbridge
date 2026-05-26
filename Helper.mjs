@@ -19,14 +19,14 @@ const Helper = {
     LoadTasksJson: (persistence) => {
         Helper.PERSISTENCE = persistence
         Helper.TASKS_JSON = {
-            Statistics: {},
-            Tasks: [],
-            WorkerStatistics: {},
+            statistics: {},
+            tasks: [],
+            workerStatistics: {},
         }
         if (persistence === Helper.PERSISTENCE_ONDISK) {
             if (!Fs.existsSync(TASKS_JSON_PATH)) {
                 Fs.mkdirSync(Path.dirname(TASKS_JSON_PATH), { recursive: true })
-                SaveTasksJson()
+                Helper.SaveTasksJson()
             } else {
                 Helper.TASKS_JSON = JSON.parse(Fs.readFileSync(TASKS_JSON_PATH))
             }
